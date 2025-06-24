@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <title>Associazione di Ricerca XYZ</title>
+    <style>
+        :root {
+            --color-bg: #FFFFFF;
+            --color-primary: #252A40;
+            --color-accent: #6C4EFF;
+            --color-muted: #6E7080;
+
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 2rem;
+            --space-lg: 4rem;
+            --space-lg2: 8rem;
+
+            --font-sans: 'Arial', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--color-primary);
+            background: var(--color-bg);
+            line-height: 1.75;
+        }
+
+        a {
+            color: var(--color-muted);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        a:hover {
+            color: var(--color-accent);
+        }
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            background: var(--color-bg);
+            padding: var(--space-sm) 0;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+            margin-bottom: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--space-sm);
+        }
+
+        .site-header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .main-nav ul {
+            list-style: none;
+            display: flex;
+            gap: var(--space-lg);
+        }
+
+        .card.hero-card {
+            max-width: 1200px;
+            margin: var(--space-lg) auto;
+            background: #FFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            padding: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .card.hero-card {
+                margin-left: var(--space-sm);
+                margin-right: var(--space-sm);
+            }
+        }
+
+        .hero {
+            display: flex;
+            height: 100%;
+        }
+
+        .hero-content,
+        .hero-image {
+            flex: 1;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: var(--space-lg);
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .hero-content p {
+            max-width: 600px;
+            margin: 0 auto var(--space-sm);
+            color: var(--color-muted);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--color-accent);
+            color: #fff;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .hero-image {
+            display: flex;
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+
+        .hero-image img {
+            width: 100%;
+            object-fit: cover;
+            clip-path: polygon(10% 0%, 100% 0%, 100% 100%, 0% 100%);
+        }
+
+        @media (max-width: 768px) {
+            .hero-content {
+                padding: var(--space-md);
+            }
+
+            .hero-content h1 {
+                font-size: 1.75rem;
+            }
+
+            .hero-content p {
+                font-size: 0.95rem;
+            }
+
+            .hero-image img {
+                border-top-left-radius: 0.75rem;
+                border-top-right-radius: 0.75rem;
+            }
+        }
+
+
+        .team .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: var(--space-md);
+}
+
+
+        .team .card {
+            width: 100%;
+            max-width: 100%;
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .team .card:hover {
+            transform: translateY(-4px);
+        }
+
+        .team .card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+        }
+
+        @media (max-width: 768px) {
+
+            .team .card img {
+                height: auto;
+                max-height: 300px;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+        }
+
+
+        .card-body {
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .card-body h3 {
+            margin: 0.5rem 0 0.25rem;
+            font-size: 1.125rem;
+            font-weight: bold;
+        }
+
+        .card-body .role {
+            font-size: 0.9rem;
+            color: var(--color-muted);
+            margin-bottom: 1rem;
+        }
+
+        .social {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .social a {
+            background: #f5f5f5;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--color-accent);
+            transition: background 0.2s;
+        }
+
+        .social a:hover {
+            background: var(--color-accent);
+            color: #fff;
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+        }
+
+        .nav-link:focus,
+        .nav-link:active,
+        .nav-link.show,
+        .nav-item.show>.nav-link {
+            color: var(--color-accent) !important;
+        }
+
+        .projects .project-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+            align-items: stretch;
+        }
+
+        .project-card {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .project-card h3 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .project-card p {
+            color: var(--color-muted);
+            font-size: 0.95rem;
+            flex: 1;
+        }
+
+        .project-logo {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .project-logo img {
+            height: 110px;
+            object-fit: contain;
+        }
+
+        .logo-cogetest {
+            height: 90px !important;
+        }
+
+        .contact .map-container {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+
+        .contact-info-box {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            max-width: 280px;
+            font-size: 0.9rem;
+        }
+
+        .contact-info-box a {
+            color: var(--color-muted);
+        }
+
+        .contact-info-box i {
+            color: var(--color-accent);
+            margin-right: 8px;
+        }
+
+        .site-footer {
+            background: #f5f8ff;
+            color: var(--color-muted);
+            font-size: 0.9rem;
+            margin-top: var(--space-lg);
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .footer-links a {
+            color: var(--color-muted);
+            margin: 0 0.25rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--color-accent);
+        }
+
+        section:not(.hero) {
+            margin-top: var(--space-lg2);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="site-header">
+        <nav class="navbar navbar-expand-lg bg-white">
+            <div class="container px-4">
+                <a class="navbar-brand" href="/">Logo</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                    aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="projects">Progetti</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="team">Team</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="contact">Contatti</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="{{ asset('flag/' . session('locale', 'it') . '.png') }}" alt="flag" style="height: 20px;">
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                                @foreach (["it" => "Italiano", "de" => "Deutsch", "en" => "English", "fr" => "Français", "es" => "Español"] as $key => $value)
+                                <li>
+                                    <a class="dropdown-item" href="/set-language/{{$key}}">
+                                        <img src="{{ asset("flag/{$key}.png") }}" alt="{{$key}}" style="height: 20px; margin-right: 8px;"> {{$value}}
+                                    </a>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="card hero-card">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Lorem Ipsum</h1>
+                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
+            </div>
+            <div class="hero-image">
+                <img src="team.png" alt="Team ACLAI Lab" />
+            </div>
+        </section>
+    </div>
+
+    <section id="projects" class="projects">
+        <div class="container">
+            <h2 style="text-align: center;">Progetti</h2>
+            <div class="project-cards">
+                <a href="https://dk.aclai.unife.it/Arturo" target="_blank" class="project-card-link">
+                    <div class="project-card">
+                        <h3>Arturo</h3>
+                        <p>
+                            Un Modello di Predizione del Rischio di depressione in oncologia.
+                        </p>
+                        <div class="project-logo">
+                            <img src="arturo.png" alt="Arturo Logo">
+                        </div>
+                    </div>
+                </a>
+                <a href="https://dk.aclai.unife.it/Manto" target="_blank" class="project-card-link">
+                    <div class="project-card">
+                        <h3>Manto</h3>
+                        <p>
+                            Calcolatore per il rischio di depressione.
+                        </p>
+                        <div class="project-logo">
+                            <img src="manto.png" alt="Manto Logo">
+                        </div>
+                    </div>
+                </a>
+                <a href="https://cogetest.unife.it/" target="_blank" class="project-card-link">
+                    <div class="project-card">
+                        <h3>Cogetest</h3>
+                        <p>
+                            Piattaforma per la valutazione online delle facoltà cognitive.
+                        </p>
+                        <div class="project-logo">
+                            <img src="cogetest.png" alt="Cogetest Logo" class="logo-cogetest">
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="team" class="team">
+        <div class="container">
+            <h2 style="text-align: center;">Il nostro Team</h2>
+            <div class="cards">
+                <div class="card">
+                    <img src="profile.png" alt="Prof. Lorem Ipsum" />
+                    <div class="card-body">
+                        <h3>Prof. Lorem Ipsum</h3>
+                        <p class="role">Professore Associato</p>
+                        <div class="social">
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="profile.png" alt="Prof. Lorem Ipsum" />
+                    <div class="card-body">
+                        <h3>Prof. Lorem Ipsum</h3>
+                        <p class="role">Professore Associato</p>
+                        <div class="social">
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="profile.png" alt="Prof. Lorem Ipsum" />
+                    <div class="card-body">
+                        <h3>Prof. Lorem Ipsum</h3>
+                        <p class="role">Professore Associato</p>
+                        <div class="social">
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 style="text-align: center;">Contatti</h2>
+            <div class="project-card" style="padding: 0;">
+                <div class="map-container">
+                    <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=11.6300,44.8355,11.6340,44.8380&amp;layer=mapnik&amp;marker=44.8369449,11.6320699"
+                        width="100%" height="100%" style="border:0;"></iframe>
+                    <div class="contact-info-box">
+                        <p><strong>Italia,</strong><br><span style="font-size: 1.5rem;">Ferrara</span></p>
+                        <p><i class="fas fa-envelope"></i> <strong>Contattaci</strong><br><a href="mailto:lorem@ipsum.it">lorem@ipsum.it</a></p>
+                        <p><i class="fas fa-map-marker-alt"></i> <strong>Dove siamo</strong><br>Via Fossato di Mortara, 64</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <footer class="site-footer">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap py-4">
+            <div class="footer-logo">[Logo]</div>
+            <div class="footer-links">
+                <a href="#">Cookie</a> / <a href="#">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+
+
+</body>
+
+</html>
+
+<script>
+    function changeLanguage(locale) {
+        fetch("{{ route('set.language.ajax') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    locale: locale
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Errore durante il cambio lingua.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    document.querySelectorAll('.scroll-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('data-target');
+            const target = document.getElementById(targetId);
+            if (target) {
+                window.scrollTo({
+                    top: target.offsetTop - 100,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+</script>
