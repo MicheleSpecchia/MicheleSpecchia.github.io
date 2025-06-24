@@ -394,7 +394,7 @@
                         <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="contact">Contatti</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="{{ asset('flag/' . session('locale', 'it') . '.png') }}" alt="flag" style="height: 20px;">
+                                <img src="'flag/' . session('locale', 'it') . '.png')" alt="flag" style="height: 20px;">
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
                                 @foreach (["it" => "Italiano", "de" => "Deutsch", "en" => "English", "fr" => "Français", "es" => "Español"] as $key => $value)
