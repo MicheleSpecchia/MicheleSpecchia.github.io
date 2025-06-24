@@ -389,23 +389,19 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="projects">Progetti</a></li>
-                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="team">Team</a></li>
-                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="contact">Contatti</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="'flag/' . session('locale', 'it') . '.png')" alt="flag" style="height: 20px;">
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
-                                @foreach (["it" => "Italiano", "de" => "Deutsch", "en" => "English", "fr" => "Français", "es" => "Español"] as $key => $value)
-                                <li>
-                                    <a class="dropdown-item" href="/set-language/{{$key}}">
-                                        <img src="{{ asset("flag/{$key}.png") }}" alt="{{$key}}" style="height: 20px; margin-right: 8px;"> {{$value}}
-                                    </a>
-                                </li>
-                                @endforeach
-                            </ul>
-                        </li>
+                     <li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <img src="flag/it.png" alt="flag" style="height: 20px;">
+  </a>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+    <li><a class="dropdown-item" href="#"><img src="flag/it.png" alt="it" style="height: 20px; margin-right: 8px;"> Italiano</a></li>
+    <li><a class="dropdown-item" href="#"><img src="flag/en.png" alt="en" style="height: 20px; margin-right: 8px;"> English</a></li>
+    <li><a class="dropdown-item" href="#"><img src="flag/de.png" alt="de" style="height: 20px; margin-right: 8px;"> Deutsch</a></li>
+    <li><a class="dropdown-item" href="#"><img src="flag/fr.png" alt="fr" style="height: 20px; margin-right: 8px;"> Français</a></li>
+    <li><a class="dropdown-item" href="#"><img src="flag/es.png" alt="es" style="height: 20px; margin-right: 8px;"> Español</a></li>
+  </ul>
+</li>
+
                     </ul>
                 </div>
             </div>
