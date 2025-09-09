@@ -4,11 +4,14 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="COMP-PSY: soluzioni di computational psychiatry." />
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <title>Website Psichiatria</title>
+
+    <title>COMPPSY</title>
     <style>
         :root {
             --color-bg: #FFFFFF;
@@ -70,6 +73,10 @@
             justify-content: space-between;
         }
 
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: .5px;
+        }
 
         .logo {
             font-size: 1.25rem;
@@ -130,6 +137,14 @@
             color: var(--color-muted);
         }
 
+        .hero-cta {
+            display: flex;
+            gap: .75rem;
+            margin-top: .75rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
         .btn {
             display: inline-block;
             padding: var(--space-sm) var(--space-md);
@@ -141,6 +156,22 @@
         }
 
         .btn:hover {
+            display: inline-block;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--color-accent);
+            color: #fff;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            transform: translateY(-2px);
+        }
+
+        .btn:after {
+            display: inline-block;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--color-accent);
+            color: #fff;
+            border-radius: 0.25rem;
+            font-weight: 600;
             transform: translateY(-2px);
         }
 
@@ -176,14 +207,12 @@
             }
         }
 
-
         .team .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-    margin-top: var(--space-md);
-}
-
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: var(--space-md);
+        }
 
         .team .card {
             width: 100%;
@@ -289,7 +318,7 @@
             background: #fff;
             border-radius: 1rem;
             padding: 1.5rem;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 16px rgba(26, 14, 255, 0.4);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -323,6 +352,60 @@
             height: 90px !important;
         }
 
+        .events .cards,
+        .media .cards,
+        .blog .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: var(--space-md);
+        }
+
+        .event-card,
+        .press-card,
+        .blog-card {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            height: 100%;
+        }
+
+        .event-meta {
+            display: flex;
+            gap: .75rem;
+            align-items: center;
+            color: var(--color-muted);
+            font-size: .92rem;
+            margin-bottom: .25rem;
+        }
+
+        .event-meta i {
+            color: var(--color-accent);
+        }
+
+        .pubb .pub-list {
+            margin-top: var(--space-md);
+        }
+
+        .pubb .pub-item {
+            background: #fff;
+            border-radius: .75rem;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1rem;
+        }
+
+        .pubb .pub-title {
+            font-weight: 700;
+        }
+
+        .pubb .pub-meta {
+            color: var(--color-muted);
+            font-size: .92rem;
+        }
+
+
         .contact .map-container {
             position: relative;
             height: 400px;
@@ -354,23 +437,24 @@
         .site-footer {
             background: #f5f8ff;
             color: var(--color-muted);
-            font-size: 0.9rem;
+            font-size: .9rem;
             margin-top: var(--space-lg);
         }
 
         .footer-logo {
-            font-size: 1.5rem;
-            font-weight: bold;
+            font-size: 1.25rem;
+            font-weight: 800;
         }
 
         .footer-links a {
             color: var(--color-muted);
-            margin: 0 0.25rem;
+            margin: 0 .25rem;
         }
 
         .footer-links a:hover {
             color: var(--color-accent);
         }
+
 
         section:not(.hero) {
             margin-top: var(--space-lg2);
@@ -379,10 +463,12 @@
 </head>
 
 <body>
+    <a href="#content" class="visually-hidden-focusable">Salta al contenuto</a>
+
     <header class="site-header">
         <nav class="navbar navbar-expand-lg bg-white">
             <div class="container px-4">
-                <a class="navbar-brand" href="/">Logo</a>
+                <a class="navbar-brand" href="/">COMP-PSY</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
                     aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -390,21 +476,26 @@
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="projects">Progetti</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="events">Eventi</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="pubb">Pubblicazioni</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="media">Media/Press</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="blog">Blog</a></li>
                         <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="team">Team</a></li>
                         <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="contact">Contatti</a></li>
                         <li class="nav-item dropdown">
-  <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    <img src="flag/it.png" alt="flag" style="height: 20px;">
-  </a>
-  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
-    <li><a class="dropdown-item" href="#"><img src="flag/it.png" alt="it" style="height: 20px; margin-right: 8px;"> Italiano</a></li>
-    <li><a class="dropdown-item" href="#"><img src="flag/en.png" alt="en" style="height: 20px; margin-right: 8px;"> English</a></li>
-    <li><a class="dropdown-item" href="#"><img src="flag/de.png" alt="de" style="height: 20px; margin-right: 8px;"> Deutsch</a></li>
-    <li><a class="dropdown-item" href="#"><img src="flag/fr.png" alt="fr" style="height: 20px; margin-right: 8px;"> Français</a></li>
-    <li><a class="dropdown-item" href="#"><img src="flag/es.png" alt="es" style="height: 20px; margin-right: 8px;"> Español</a></li>
-  </ul>
-</li>
-
+                            <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="{{ asset('flag/' . session('locale', 'it') . '.png') }}" alt="flag" style="height: 20px;">
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                                @foreach (["it" => "Italiano", "de" => "Deutsch", "en" => "English", "fr" => "Français", "es" => "Español"] as $key => $value)
+                                <li>
+                                    <a class="dropdown-item" href="/set-language/{{$key}}">
+                                        <img src="{{ asset("flag/{$key}.png") }}" alt="{{$key}}" style="height: 20px; margin-right: 8px;"> {{$value}}
+                                    </a>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -414,9 +505,14 @@
     <div class="card hero-card">
         <section class="hero">
             <div class="hero-content">
-                <h1>Lorem Ipsum</h1>
+                <h1>Computational Psychiatry</h1>
                 <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
+                <div class="hero-cta">
+                    <a class="scroll-link btn btn-outline" href="#" data-target="projects"><i class="fa-solid fa-diagram-project me-2"></i>Scopri i progetti</a>
+                    <a class="scroll-link btn btn-outline" href="#" data-target="contact"><i class="fa-solid fa-paper-plane me-2"></i>Parliamone</a>
+                </div>
             </div>
+
             <div class="hero-image">
                 <img src="team.png" alt="Team ACLAI Lab" />
             </div>
@@ -460,6 +556,122 @@
                         </div>
                     </div>
                 </a>
+                <a href="https://dk.aclai.unife.it/Frida" target="_blank" class="project-card-link">
+                    <div class="project-card">
+                        <h3>Frida</h3>
+                        <p>
+                            Piattaforma per la somministrazione adattiva di scale psicometriche..
+                        </p>
+                        <div class="project-logo">
+                            <img src="Frida.png" alt="Frida Logo" class="logo-cogetest">
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- EVENTI -->
+    <section id="events" class="events" aria-labelledby="events-title">
+        <div class="container">
+            <h2 id="events-title" style="text-align:center;">Eventi</h2>
+          
+            <div class="cards">
+                <div class="project-card">
+                    <div class="event-meta"><i class="fa-solid fa-calendar-day"></i><span>12 ottobre 2025 • 14:00–16:00 CET</span></div>
+                    <div class="event-meta"><i class="fa-solid fa-location-dot"></i><span>Università di Ferrara • Aula Magna</span></div>
+                    <h3 class="mt-2">Valutazione adattiva in psiconcologia: casi d’uso</h3>
+                    <p class="mb-2">Sessione pratica su scale adattive e integrazione nei flussi clinici.</p>
+                </div>
+
+                <div class="project-card">
+                    <div class="event-meta"><i class="fa-solid fa-calendar-day"></i><span>28 novembre 2025 • 10:00–11:30 CET</span></div>
+                    <div class="event-meta"><i class="fa-solid fa-video"></i><span>Webinar</span></div>
+                    <h3 class="mt-2">Modelli predittivi explainable per la salute mentale</h3>
+                    <p class="mb-2">Dalla validazione ai dashboard clinici: best practice.</p>
+                </div>
+
+                <div class="project-card">
+                    <div class="event-meta"><i class="fa-solid fa-calendar-day"></i><span>15 gennaio 2026 • 9:30–17:00 CET</span></div>
+                    <div class="event-meta"><i class="fa-solid fa-location-dot"></i><span>Milano • Centro Congressi</span></div>
+                    <h3 class="mt-2">Data-driven Psychiatry Day</h3>
+                    <p class="mb-2">Una giornata dedicata a IRT, CAT e integrazione con EHR.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PUBBLICAZIONI -->
+    <section id="pubb" class="pubb" aria-labelledby="pubb-title">
+        <div class="container">
+            <h2 id="pubb-title" style="text-align:center;">Pubblicazioni</h2>
+           
+            <div class="pub-list">
+                <div class="pub-item">
+                    <div class="pub-title">Adaptive screening for depression in oncology: design and validation of a CAT approach</div>
+                    <div class="pub-meta">Autori: Cognome A., Cognome B., Cognome C. • 2024 • <a href="#" rel="noopener">DOI:10.xxxx/xxxx</a></div>
+                </div>
+                <div class="pub-item">
+                    <div class="pub-title">Explainable risk calculators in consultation-liaison psychiatry</div>
+                    <div class="pub-meta">Autori: Cognome D., Cognome E. • 2025 • <a href="#" rel="noopener">preprint</a></div>
+                </div>
+                <div class="pub-item">
+                    <div class="pub-title">From item banks to clinical dashboards: an end-to-end pipeline</div>
+                    <div class="pub-meta">Autori: Cognome F., Cognome G. • 2023 • <a href="#" rel="noopener">PDF</a></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MEDIA/PRESS -->
+    <section id="media" class="media" aria-labelledby="media-title">
+        <div class="container">
+            <h2 id="media-title" style="text-align:center;">Media / Press</h2>
+            <div class="cards">
+                <article class="project-card">
+                    <h3>“Algoritmi a supporto della psichiatria di consultazione”</h3>
+                    <p class="mb-2">Intervista sul ruolo dei modelli predittivi nella pratica clinica ospedaliera.</p>
+                </article>
+
+                <article class="project-card">
+                    <h3>“Scale adattive: meno domande, stessa accuratezza”</h3>
+                    <p class="mb-2">Approfondimento su IRT e Computerized Adaptive Testing.</p>
+                </article>
+
+                <article class="project-card">
+                    <h3>“Dati, etica e trasparenza in sanità”</h3>
+                    <p class="mb-2">Panel con clinici e data scientist sul tema explainability.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- BLOG -->
+    <section id="blog" class="blog" aria-labelledby="blog-title">
+        <div class="container">
+            <h2 id="blog-title" style="text-align:center;">Blog</h2>
+
+            <div class="cards">
+                <article class="project-card">
+                    <div class="text-muted mb-1">05 settembre 2025</div>
+                    <h3>Come passare da un item bank all’IRT operativo in produzione</h3>
+                    <p>Architettura, caching dei parametri, validazioni e metriche essenziali.</p>
+                    <a class="btn btn-outline" href="#">Leggi</a>
+                </article>
+
+                <article class="project-card">
+                    <div class="text-muted mb-1">20 agosto 2025</div>
+                    <h3>Integrazione Laravel + R (plumber) per predizioni in tempo reale</h3>
+                    <p>Pattern pratici per connettere servizi R esterni a un backend PHP.</p>
+                    <a class="btn btn-outline" href="#">Leggi</a>
+                </article>
+
+                <article class="project-card">
+                    <div class="text-muted mb-1">02 luglio 2025</div>
+                    <h3>Explainability minima utile per clinici: cosa mostrare davvero</h3>
+                    <p>Feature importance, controparti locali e limiti da comunicare.</p>
+                    <a class="btn btn-outline" href="#">Leggi</a>
+                </article>
             </div>
         </div>
     </section>
@@ -529,39 +741,55 @@
 
     <footer class="site-footer">
         <div class="container d-flex justify-content-between align-items-center flex-wrap py-4">
-            <div class="footer-logo">[Logo]</div>
+            <div class="footer-logo">COMP-PSY</div>
             <div class="footer-links">
-                <a href="#">Cookie</a> / <a href="#">Privacy</a>
+                <a href="#">Cookie</a> / <a href="#">Privacy</a> • <span id="foot-year"></span>
             </div>
         </div>
     </footer>
-
-
 
 </body>
 
 </html>
 
 <script>
+    
     function changeLanguage(locale) {
         fetch("{{ route('set.language.ajax') }}", {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    locale: locale
+                    locale
                 })
             })
-            .then(response => {
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    console.error('Errore durante il cambio lingua.');
-                }
-            })
-            .catch(error => console.error('Error:', error));
+            .then(r => r.ok ? location.reload() : console.error('Errore durante il cambio lingua.'))
+            .catch(err => console.error('Error:', err));
     }
+
+    const headerOffset = 80;
+    document.querySelectorAll('.scroll-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const id = link.getAttribute('data-target');
+            const target = document.getElementById(id);
+            if (!target) return;
+            const top = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+            window.scrollTo({
+                top,
+                behavior: 'smooth'
+            });
+            
+            const nav = document.getElementById('navbarNavDropdown');
+            if (nav.classList.contains('show')) new bootstrap.Collapse(nav).toggle();
+        });
+    });
+
+  
+    const sections = ['projects', 'events', 'pubb', 'media', 'blog', 'team', 'contact']
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
 
     document.querySelectorAll('.scroll-link').forEach(link => {
         link.addEventListener('click', function(e) {
@@ -576,4 +804,10 @@
             }
         });
     });
+
+    document.getElementById('foot-year').textContent = new Date().getFullYear();
+  
 </script>
+</body>
+
+</html>
