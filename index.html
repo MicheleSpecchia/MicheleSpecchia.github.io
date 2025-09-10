@@ -1,28 +1,23 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_','-', app()->getLocale()) }}">
+<html lang="it">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="{{ __('common.hero.lead') }}" />
+    <meta name="description" content="COMP-PSY: soluzioni di computational psychiatry." />
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <title>COMPPSY</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         :root {
-            --color-bg: #0b1020;
-            --color-surface: #0f152b;
-            --color-primary: #E6E9F4;
-            --color-accent: #7C5CFF;
-            --color-accent-2: #3bd3ff;
-            --color-muted: #9AA1B9;
-            --border-soft: rgba(255,255,255,0.08);
+            --color-bg: #FFFFFF;
+            --color-primary: #252A40;
+            --color-accent: #6C4EFF;
+            --color-muted: #6E7080;
 
             --space-xs: 0.5rem;
             --space-sm: 1rem;
@@ -30,11 +25,7 @@
             --space-lg: 4rem;
             --space-lg2: 8rem;
 
-            --font-sans: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-
-            --grad-hero: radial-gradient(1200px 600px at 10% -10%, rgba(124,92,255,.25), transparent 50%),
-                          radial-gradient(1000px 700px at 110% 0%, rgba(59,211,255,.18), transparent 40%),
-                          linear-gradient(180deg, #0b1020 0%, #0b1020 40%, #0f152b 100%);
+            --font-sans: 'Arial', sans-serif;
         }
 
         * {
@@ -46,20 +37,9 @@
         body {
             font-family: var(--font-sans);
             color: var(--color-primary);
-            background: var(--grad-hero);
+            background: var(--color-bg);
             line-height: 1.75;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
-
-        /* Force light text across main content */
-        body, h1, h2, h3, h4, h5, h6, p, li, label, small, span { color: var(--color-primary) !important; }
-        .text-muted { color: #B8C1E6 !important; }
-
-        /* Form controls on dark bg */
-        .form-control, .form-select { background: rgba(255,255,255,0.06); border-color: var(--border-soft); color: var(--color-primary); }
-        .form-control::placeholder { color: #A7B0CF; }
-        .form-control:focus, .form-select:focus { background: rgba(255,255,255,0.08); border-color: rgba(124,92,255,.45); box-shadow: 0 0 0 .2rem rgba(124,92,255,.15); color: var(--color-primary); }
 
         a {
             color: var(--color-muted);
@@ -74,11 +54,10 @@
         .site-header {
             position: sticky;
             top: 0;
-            background: rgba(10, 14, 30, 0.65);
-            backdrop-filter: saturate(160%) blur(10px);
+            background: var(--color-bg);
             padding: var(--space-sm) 0;
-            border-bottom: 1px solid var(--border-soft);
-            z-index: 20;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            z-index: 10;
             margin-bottom: 0;
         }
 
@@ -96,11 +75,7 @@
 
         .navbar-brand {
             font-weight: 800;
-            letter-spacing: .4px;
-            background: linear-gradient(90deg, #fff, #9fb3ff 60%, #7C5CFF);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            letter-spacing: .5px;
         }
 
         .logo {
@@ -118,7 +93,7 @@
         .card.hero-card {
             max-width: 1200px;
             margin: var(--space-lg) auto;
-            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));       
+            background: #FFF;
             border-radius: 0.75rem;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
             overflow: hidden;
@@ -134,8 +109,7 @@
 
         .hero {
             display: flex;
-            height: 100%;     
-            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));       
+            height: 100%;
         }
 
         .hero-content,
@@ -153,44 +127,53 @@
         }
 
         .hero-content h1 {
-            font-size: 2.7rem;
-            letter-spacing: .2px;
-            margin-bottom: .75rem;
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
         }
 
         .hero-content p {
-            max-width: 720px;
+            max-width: 600px;
             margin: 0 auto var(--space-sm);
             color: var(--color-muted);
-            font-size: 1.05rem;
         }
 
         .hero-cta {
             display: flex;
             gap: .75rem;
-            margin-top: 1rem;
+            margin-top: .75rem;
             flex-wrap: wrap;
             justify-content: center;
         }
 
-        .btn { font-weight: 600; border-radius: .5rem; }
-        .btn-cta {
-            padding: .7rem 1.25rem;
-            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
-            color: #081226;
-            border: 1px solid rgba(255,255,255,.2);
-            box-shadow: 0 8px 20px rgba(124,92,255,0.35);
-            transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+        .btn {
+            display: inline-block;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--color-accent);
+            color: #fff;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            transition: transform 0.2s;
         }
-        .btn-cta:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 10px 24px rgba(124,92,255,0.45); }
-        .btn-soft {
-            padding: .7rem 1.1rem;
-            background: rgba(255,255,255,0.06);
-            color: var(--color-primary);
-            border: 1px solid var(--border-soft);
-            transition: background .18s ease, transform .18s ease;
+
+        .btn:hover {
+            display: inline-block;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--color-accent);
+            color: #fff;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            transform: translateY(-2px);
         }
-        .btn-soft:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+        .btn:after {
+            display: inline-block;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--color-accent);
+            color: #fff;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            transform: translateY(-2px);
+        }
 
         .hero-image {
             display: flex;
@@ -234,10 +217,9 @@
         .team .card {
             width: 100%;
             max-width: 100%;
-            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-            border: 1px solid var(--border-soft);
+            background: #fff;
             border-radius: 1rem;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -333,18 +315,15 @@
         }
 
         .project-card {
-            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-            border: 1px solid var(--border-soft);
+            background: #fff;
             border-radius: 1rem;
-            padding: 1.25rem;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(26, 14, 255, 0.4);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             height: 100%;
-            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
         }
-        .project-card:hover { transform: translateY(-3px); box-shadow: 0 12px 34px rgba(0,0,0,0.35); border-color: rgba(124,92,255,.35); }
 
         .project-card h3 {
             font-size: 1.2rem;
@@ -385,11 +364,10 @@
         .event-card,
         .press-card,
         .blog-card {
-            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-            border: 1px solid var(--border-soft);
+            background: #fff;
             border-radius: 1rem;
             padding: 1.25rem;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
             height: 100%;
         }
 
@@ -411,15 +389,12 @@
         }
 
         .pubb .pub-item {
-            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-            border: 1px solid var(--border-soft);
-            border-radius: 1rem;
-            padding: 1.25rem;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+            background: #fff;
+            border-radius: .75rem;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
             margin-bottom: 1rem;
-            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
         }
-        .pubb .pub-item:hover { transform: translateY(-3px); box-shadow: 0 12px 34px rgba(0,0,0,0.35); border-color: rgba(124,92,255,.35); }
 
         .pubb .pub-title {
             font-weight: 700;
@@ -442,17 +417,17 @@
             position: absolute;
             top: 1rem;
             right: 1rem;
-            background: rgba(15,21,43,.88);
-            border: 1px solid var(--border-soft);
+            background: white;
             padding: 1rem;
             border-radius: 0.75rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
             max-width: 280px;
             font-size: 0.9rem;
-            color: var(--color-primary);
         }
 
-        .contact-info-box a { color: var(--color-primary); }
+        .contact-info-box a {
+            color: var(--color-muted);
+        }
 
         .contact-info-box i {
             color: var(--color-accent);
@@ -460,11 +435,10 @@
         }
 
         .site-footer {
-            background: transparent;
+            background: #f5f8ff;
             color: var(--color-muted);
             font-size: .9rem;
             margin-top: var(--space-lg);
-            border-top: 1px solid var(--border-soft);
         }
 
         .footer-logo {
@@ -482,36 +456,9 @@
         }
 
 
-        section:not(.hero) { margin-top: var(--space-lg2); }
-        .section-title { text-align:center; margin-bottom: 1rem; }
-        .section-title .accent {
-            display:inline-block; height:4px; width:72px; border-radius: 999px;
-            background: linear-gradient(90deg, var(--color-accent), var(--color-accent-2));
+        section:not(.hero) {
+            margin-top: var(--space-lg2);
         }
-
-        /* Dropzone */
-        .dropzone { border: 1px dashed var(--border-soft); background: rgba(255,255,255,0.04); cursor: pointer; min-height: 110px; display:flex; align-items:center; justify-content:center; }
-        .dropzone.border-primary { border-color: var(--color-accent); }
-
-        /* Reveal on scroll */
-        .reveal { opacity: 0; transform: translateY(16px); transition: opacity .4s ease, transform .4s ease; }
-        .reveal.show { opacity: 1; transform: none; }
-
-        /* Nav colors + active */
-        .navbar .nav-link { color: var(--color-primary) !important; transition: color .18s ease; }
-        .navbar .nav-link.active { color: var(--color-accent-2) !important; }
-        .navbar .nav-link:hover { color: var(--color-accent) !important; }
-        .navbar-toggler { border-color: rgba(255,255,255,0.25); }
-        .navbar-toggler-icon { 
-            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(255,255,255,1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
-        }
-        .navbar .btn-logout { padding: .35rem .7rem; line-height: 1.1; }
-        .navbar .dropdown-menu { background: rgba(15,21,43,.96); border: 1px solid var(--border-soft); }
-        .navbar .dropdown-item { color: var(--color-primary); }
-        .navbar .dropdown-item:hover { background: rgba(255,255,255,0.06); color: var(--color-accent-2); }
-
-        /* Better focus */
-        :focus-visible { outline: 2px solid var(--color-accent-2); outline-offset: 2px; border-radius: .4rem; }
     </style>
 </head>
 
@@ -519,22 +466,22 @@
     <a href="#content" class="visually-hidden-focusable">Salta al contenuto</a>
 
     <header class="site-header">
-        <nav class="navbar navbar-expand-lg navbar-dark">
+        <nav class="navbar navbar-expand-lg bg-white">
             <div class="container px-4">
-                <a class="navbar-brand" href="/">{{ __('common.brand') }}</a>
+                <a class="navbar-brand" href="/">COMP-PSY</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
                     aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="projects">{{ __('common.nav.projects') }}</a></li>
-                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="events">{{ __('common.nav.events') }}</a></li>
-                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="pubb">{{ __('common.nav.pubb') }}</a></li>
-                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="media">{{ __('common.nav.media') }}</a></li>
-                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="blog">{{ __('common.nav.blog') }}</a></li>
-                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="team">{{ __('common.nav.team') }}</a></li>
-                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="contact">{{ __('common.nav.contact') }}</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="projects">Progetti</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="events">Eventi</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="pubb">Pubblicazioni</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="media">Media/Press</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="blog">Blog</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="team">Team</a></li>
+                        <li class="nav-item"><a class="nav-link scroll-link" href="#" data-target="contact">Contatti</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <img src="{{ asset('flag/' . session('locale', 'it') . '.png') }}" alt="flag" style="height: 20px;">
@@ -542,23 +489,13 @@
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
                                 @foreach (["it" => "Italiano", "de" => "Deutsch", "en" => "English", "fr" => "Français", "es" => "Español"] as $key => $value)
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('set.language', ['language' => $key]) }}">
+                                    <a class="dropdown-item" href="/set-language/{{$key}}">
                                         <img src="{{ asset("flag/{$key}.png") }}" alt="{{$key}}" style="height: 20px; margin-right: 8px;"> {{$value}}
                                     </a>
                                 </li>
                                 @endforeach
                             </ul>
                         </li>
-                        @if(session('is_admin'))
-                        <li class="nav-item d-flex align-items-center ms-lg-3 mt-2 mt-lg-0">
-                            <form method="POST" action="{{ route('admin.logout') }}" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-outline-danger btn-logout">
-                                    <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
-                                </button>
-                            </form>
-                        </li>
-                        @endif
                     </ul>
                 </div>
             </div>
@@ -568,11 +505,11 @@
     <div class="card hero-card">
         <section class="hero">
             <div class="hero-content">
-                <h1>{{ __('common.hero.title') }}</h1>
-                <p>{{ __('common.hero.lead') }}</p>
+                <h1>Computational Psychiatry</h1>
+                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
                 <div class="hero-cta">
-                    <a class="scroll-link btn btn-cta" href="#" data-target="projects"><i class="fa-solid fa-diagram-project me-2"></i>{{ __('common.hero.cta_projects') }}</a>
-                    <a class="scroll-link btn btn-soft" href="#" data-target="contact"><i class="fa-solid fa-paper-plane me-2"></i>{{ __('common.hero.cta_contact') }}</a>
+                    <a class="scroll-link btn btn-outline" href="#" data-target="projects"><i class="fa-solid fa-diagram-project me-2"></i>Scopri i progetti</a>
+                    <a class="scroll-link btn btn-outline" href="#" data-target="contact"><i class="fa-solid fa-paper-plane me-2"></i>Parliamone</a>
                 </div>
             </div>
 
@@ -584,138 +521,52 @@
 
     <section id="projects" class="projects">
         <div class="container">
-            <h2 style="text-align: center;">{{ __('common.sections.projects') }}</h2>
-            <div class="section-title"><span class="accent"></span></div>
-            @if(session('is_admin'))
-            <div class="mb-3">
-                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addProjectForm">+ Aggiungi Progetto</button>
-                @if(($projects ?? collect())->isEmpty())
-                <form method="POST" action="{{ route('admin.projects.import_defaults') }}" class="d-inline ms-2">
-                    @csrf
-                    <button class="btn btn-sm btn-outline-secondary" type="submit">Importa progetti di esempio</button>
-                </form>
-                @endif
-                <div id="addProjectForm" class="collapse mt-2">
-                    <form method="POST" action="{{ route('admin.projects.store') }}" class="row g-2" enctype="multipart/form-data">
-                        @csrf
-                        <div class="col-md-4"><input name="name" class="form-control" placeholder="Nome" required></div>
-                        <div class="col-md-8"><input name="description" class="form-control" placeholder="Descrizione"></div>
-                        <div class="col-md-4"><input name="link_url" class="form-control" placeholder="Link (https://)"></div>
-                        <div class="col-md-4">
-                            <div class="dropzone text-muted border rounded p-3 text-center" role="button" data-input="projectImageNew">
-                                Trascina qui l'immagine o clicca
-                                <div class="small">PNG/JPG fino a 4MB</div>
-                            </div>
-                            <input type="file" id="projectImageNew" name="image" accept="image/*" class="d-none">
-                        </div>
-                        <div class="col-md-4"><input name="image_alt" class="form-control" placeholder="Alt immagine"></div>
-                        <div class="col-12"><button class="btn btn-primary">Salva</button></div>
-                    </form>
-                </div>
-            </div>
-            @endif
-            <div class="project-cards reveal">
-                @forelse(($projects ?? collect()) as $p)
-                @php $isAdmin = session('is_admin'); @endphp
-                @if($isAdmin)
+            <h2 style="text-align: center;">Progetti</h2>
+            <div class="project-cards">
+                <a href="https://dk.aclai.unife.it/Arturo" target="_blank" class="project-card-link">
                     <div class="project-card">
-                @else
-                    <a href="{{ $p->link_url ?? '#' }}" @if($p->link_url) target="_blank" @endif class="project-card-link">
-                    <div class="project-card">
-                @endif
-                        <h3>{{ $p->name }}</h3>
-                        <p>{{ $p->description }}</p>
+                        <h3>Arturo</h3>
+                        <p>
+                            Un Modello di Predizione del Rischio di depressione in oncologia.
+                        </p>
                         <div class="project-logo">
-                            @if($p->image_url)
-                            <img src="{{ asset($p->image_url) }}" alt="{{ $p->image_alt }}">
-                            @endif
+                            <img src="arturo.png" alt="Arturo Logo">
                         </div>
-                        @if(session('is_admin'))
-                        <div class="mt-2">
-                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#editProject{{$p->id}}">Modifica</button>
-                            <form method="POST" action="{{ route('admin.projects.destroy', $p) }}" style="display:inline" onsubmit="return confirm('Eliminare il progetto?');">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger">Elimina</button>
-                            </form>
-                        </div>
-                        <div id="editProject{{$p->id}}" class="collapse mt-2">
-                            <form method="POST" action="{{ route('admin.projects.update', $p) }}" class="row g-2" enctype="multipart/form-data">
-                                @csrf
-                                @method('PUT')
-                                <div class="col-md-4"><input name="name" class="form-control" value="{{ $p->name }}" required></div>
-                                <div class="col-md-8"><input name="description" class="form-control" value="{{ $p->description }}"></div>
-                                <div class="col-md-4"><input name="link_url" class="form-control" value="{{ $p->link_url }}" placeholder="Link (https://)"></div>
-                                <div class="col-md-4">
-                                    <div class="dropzone text-muted border rounded p-3 text-center" role="button" data-input="projectImageEdit{{$p->id}}">
-                                        Trascina qui per sostituire l'immagine
-                                        <div class="small">PNG/JPG fino a 4MB</div>
-                                    </div>
-                                    <input type="file" id="projectImageEdit{{$p->id}}" name="image" accept="image/*" class="d-none">
-                                </div>
-                                <div class="col-md-4"><input name="image_alt" class="form-control" value="{{ $p->image_alt }}" placeholder="Alt immagine"></div>
-                                <div class="col-12"><button class="btn btn-primary btn-sm">Salva modifiche</button></div>
-                            </form>
-                        </div>
-                        @endif
                     </div>
-                @if(!$isAdmin)
                 </a>
-                @endif
-                @empty
-                @if(session('is_admin'))
+                <a href="https://dk.aclai.unife.it/Manto" target="_blank" class="project-card-link">
                     <div class="project-card">
-                @else
-                    <a href="https://dk.aclai.unife.it/Arturo" target="_blank" class="project-card-link">
-                    <div class="project-card">
-                @endif
-                        <h3>{{ __('projects.arturo.name') }}</h3>
-                        <p>{{ __('projects.arturo.desc') }}</p>
+                        <h3>Manto</h3>
+                        <p>
+                            Calcolatore per il rischio di depressione.
+                        </p>
                         <div class="project-logo">
-                            <img src="arturo.png" alt="{{ __('projects.arturo.alt') }}">
+                            <img src="manto.png" alt="Manto Logo">
                         </div>
                     </div>
-                @if(!session('is_admin'))</a>@endif
-                @if(session('is_admin'))
+                </a>
+                <a href="https://cogetest.unife.it/" target="_blank" class="project-card-link">
                     <div class="project-card">
-                @else
-                    <a href="https://dk.aclai.unife.it/Manto" target="_blank" class="project-card-link">
-                    <div class="project-card">
-                @endif
-                        <h3>{{ __('projects.manto.name') }}</h3>
-                        <p>{{ __('projects.manto.desc') }}</p>
+                        <h3>Cogetest</h3>
+                        <p>
+                            Piattaforma per la valutazione online delle facoltà cognitive.
+                        </p>
                         <div class="project-logo">
-                            <img src="manto.png" alt="{{ __('projects.manto.alt') }}">
+                            <img src="cogetest.png" alt="Cogetest Logo" class="logo-cogetest">
                         </div>
                     </div>
-                @if(!session('is_admin'))</a>@endif
-                @if(session('is_admin'))
+                </a>
+                <a href="https://dk.aclai.unife.it/Frida" target="_blank" class="project-card-link">
                     <div class="project-card">
-                @else
-                    <a href="https://cogetest.unife.it/" target="_blank" class="project-card-link">
-                    <div class="project-card">
-                @endif
-                        <h3>{{ __('projects.cogetest.name') }}</h3>
-                        <p>{{ __('projects.cogetest.desc') }}</p>
+                        <h3>Frida</h3>
+                        <p>
+                            Piattaforma per la somministrazione adattiva di scale psicometriche..
+                        </p>
                         <div class="project-logo">
-                            <img src="cogetest.png" alt="{{ __('projects.cogetest.alt') }}" class="logo-cogetest">
+                            <img src="Frida.png" alt="Frida Logo" class="logo-cogetest">
                         </div>
                     </div>
-                @if(!session('is_admin'))</a>@endif
-                @if(session('is_admin'))
-                    <div class="project-card">
-                @else
-                    <a href="https://dk.aclai.unife.it/Frida" target="_blank" class="project-card-link">
-                    <div class="project-card">
-                @endif
-                        <h3>{{ __('projects.frida.name') }}</h3>
-                        <p>{{ __('projects.frida.desc') }}</p>
-                        <div class="project-logo">
-                            <img src="Frida.png" alt="{{ __('projects.frida.alt') }}" class="logo-cogetest">
-                        </div>
-                    </div>
-                @if(!session('is_admin'))</a>@endif
-                @endforelse
+                </a>
             </div>
         </div>
     </section>
@@ -723,58 +574,9 @@
     <!-- EVENTI -->
     <section id="events" class="events" aria-labelledby="events-title">
         <div class="container">
-            <h2 id="events-title" style="text-align:center;">{{ __('common.sections.events') }}</h2>
+            <h2 id="events-title" style="text-align:center;">Eventi</h2>
           
-            <div class="section-title"><span class="accent"></span></div>
-            @if(session('is_admin'))
-            <div class="mb-3">
-                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addEventForm">+ Aggiungi Evento</button>
-                <div id="addEventForm" class="collapse mt-2">
-                    <form method="POST" action="{{ route('admin.events.store') }}" class="row g-2">
-                        @csrf
-                        <div class="col-md-6"><input name="meta1_text" class="form-control" placeholder="Data/Orario (es. 12 ottobre 2025 • 14:00–16:00 CET)"></div>
-                        <div class="col-md-6"><input name="meta2_text" class="form-control" placeholder="Luogo/Tipo (es. Università di Ferrara • Aula Magna)"></div>
-                        <div class="col-md-6"><input name="title" class="form-control" placeholder="Titolo" required></div>
-                        <div class="col-md-6"><input name="summary" class="form-control" placeholder="Descrizione breve"></div>
-                        <div class="col-12"><button class="btn btn-primary">Salva</button></div>
-                    </form>
-                </div>
-            </div>
-            @endif
-            <div class="cards reveal">
-                @forelse(($events ?? collect()) as $e)
-                <div class="project-card">
-                    <div class="event-meta"><i class="{{ $e->meta1_icon ?? 'fa-solid fa-calendar-day' }}"></i><span>{{ $e->meta1_text }}</span></div>
-                    @if($e->meta2_text)
-                    <div class="event-meta"><i class="{{ $e->meta2_icon ?? 'fa-solid fa-location-dot' }}"></i><span>{{ $e->meta2_text }}</span></div>
-                    @endif
-                    <h3 class="mt-2">{{ $e->title }}</h3>
-                    <p class="mb-2">{{ $e->summary }}</p>
-                    @if(session('is_admin'))
-                    <div class="mt-2">
-                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#editEvent{{$e->id}}">Modifica</button>
-                        <form method="POST" action="{{ route('admin.events.destroy', $e) }}" style="display:inline" onsubmit="return confirm('Eliminare l\'evento?');">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger">Elimina</button>
-                        </form>
-                    </div>
-                    <div id="editEvent{{$e->id}}" class="collapse mt-2">
-                        <form method="POST" action="{{ route('admin.events.update', $e) }}" class="row g-2">
-                            @csrf
-                            @method('PUT')
-                            <div class="col-md-6"><input name="meta1_text" class="form-control" value="{{ $e->meta1_text }}" placeholder="Data/Orario"></div>
-                            <div class="col-md-6"><input name="meta2_text" class="form-control" value="{{ $e->meta2_text }}" placeholder="Luogo/Tipo"></div>
-                            <div class="col-md-6"><input name="title" class="form-control" value="{{ $e->title }}" required></div>
-                            <div class="col-md-6"><input name="summary" class="form-control" value="{{ $e->summary }}" placeholder="Descrizione breve"></div>
-                            <div class="col-md-6"><input name="meta1_icon" class="form-control" value="{{ $e->meta1_icon }}" placeholder="Icona 1 (classi FontAwesome)"></div>
-                            <div class="col-md-6"><input name="meta2_icon" class="form-control" value="{{ $e->meta2_icon }}" placeholder="Icona 2 (classi FontAwesome)"></div>
-                            <div class="col-12"><button class="btn btn-primary btn-sm">Salva modifiche</button></div>
-                        </form>
-                    </div>
-                    @endif
-                </div>
-                @empty
+            <div class="cards">
                 <div class="project-card">
                     <div class="event-meta"><i class="fa-solid fa-calendar-day"></i><span>12 ottobre 2025 • 14:00–16:00 CET</span></div>
                     <div class="event-meta"><i class="fa-solid fa-location-dot"></i><span>Università di Ferrara • Aula Magna</span></div>
@@ -795,7 +597,6 @@
                     <h3 class="mt-2">Data-driven Psychiatry Day</h3>
                     <p class="mb-2">Una giornata dedicata a IRT, CAT e integrazione con EHR.</p>
                 </div>
-                @endforelse
             </div>
         </div>
     </section>
@@ -803,70 +604,21 @@
     <!-- PUBBLICAZIONI -->
     <section id="pubb" class="pubb" aria-labelledby="pubb-title">
         <div class="container">
-            <h2 id="pubb-title" style="text-align:center;">{{ __('common.sections.pubb') }}</h2>
+            <h2 id="pubb-title" style="text-align:center;">Pubblicazioni</h2>
            
-            <div class="section-title"><span class="accent"></span></div>
-            @if(session('is_admin'))
-            <div class="mb-3">
-                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addPubForm">+ Aggiungi Pubblicazione</button>
-                <div id="addPubForm" class="collapse mt-2">
-                    <form method="POST" action="{{ route('admin.publications.store') }}" class="row g-2">
-                        @csrf
-                        <div class="col-md-6"><input name="title" class="form-control" placeholder="Titolo" required></div>
-                        <div class="col-md-6"><input name="meta_text" class="form-control" placeholder="Meta (autori • anno)"></div>
-                        <div class="col-md-6"><input name="link_url" class="form-control" placeholder="Link (https://)"></div>
-                        <div class="col-md-6"><input name="link_label" class="form-control" placeholder="Etichetta link (es. DOI, PDF, preprint)"></div>
-                        <div class="col-12"><button class="btn btn-primary">Salva</button></div>
-                    </form>
-                </div>
-            </div>
-            @endif
-            <div class="pub-list reveal">
-                @forelse(($publications ?? collect()) as $pub)
-                <div class="pub-item project-card">
-                    <div class="pub-title">{{ $pub->title }}</div>
-                    <div class="pub-meta">
-                        {{ $pub->meta_text }}
-                        @if($pub->link_url && !session('is_admin'))
-                        • <a href="{{ $pub->link_url }}" rel="noopener" target="_blank">{{ $pub->link_label ?? 'link' }}</a>
-                        @endif
-                    </div>
-                    @if(session('is_admin'))
-                    <div class="mt-2">
-                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#editPub{{$pub->id}}">Modifica</button>
-                        <form method="POST" action="{{ route('admin.publications.destroy', $pub) }}" style="display:inline" onsubmit="return confirm('Eliminare la pubblicazione?');">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger">Elimina</button>
-                        </form>
-                    </div>
-                    <div id="editPub{{$pub->id}}" class="collapse mt-2">
-                        <form method="POST" action="{{ route('admin.publications.update', $pub) }}" class="row g-2">
-                            @csrf
-                            @method('PUT')
-                            <div class="col-md-6"><input name="title" class="form-control" value="{{ $pub->title }}" required></div>
-                            <div class="col-md-6"><input name="meta_text" class="form-control" value="{{ $pub->meta_text }}" placeholder="Meta"></div>
-                            <div class="col-md-6"><input name="link_url" class="form-control" value="{{ $pub->link_url }}" placeholder="Link (https://)"></div>
-                            <div class="col-md-6"><input name="link_label" class="form-control" value="{{ $pub->link_label }}" placeholder="Etichetta link"></div>
-                            <div class="col-12"><button class="btn btn-primary btn-sm">Salva modifiche</button></div>
-                        </form>
-                    </div>
-                    @endif
-                </div>
-                @empty
-                <div class="pub-item project-card">
+            <div class="pub-list">
+                <div class="pub-item">
                     <div class="pub-title">Adaptive screening for depression in oncology: design and validation of a CAT approach</div>
                     <div class="pub-meta">Autori: Cognome A., Cognome B., Cognome C. • 2024 • <a href="#" rel="noopener">DOI:10.xxxx/xxxx</a></div>
                 </div>
-                <div class="pub-item project-card">
+                <div class="pub-item">
                     <div class="pub-title">Explainable risk calculators in consultation-liaison psychiatry</div>
                     <div class="pub-meta">Autori: Cognome D., Cognome E. • 2025 • <a href="#" rel="noopener">preprint</a></div>
                 </div>
-                <div class="pub-item project-card">
+                <div class="pub-item">
                     <div class="pub-title">From item banks to clinical dashboards: an end-to-end pipeline</div>
                     <div class="pub-meta">Autori: Cognome F., Cognome G. • 2023 • <a href="#" rel="noopener">PDF</a></div>
                 </div>
-                @endforelse
             </div>
         </div>
     </section>
@@ -874,65 +626,22 @@
     <!-- MEDIA/PRESS -->
     <section id="media" class="media" aria-labelledby="media-title">
         <div class="container">
-            <h2 id="media-title" style="text-align:center;">{{ __('common.sections.media') }}</h2>
-            <div class="section-title"><span class="accent"></span></div>
-            @if(session('is_admin'))
-            <div class="mb-3">
-                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addMediaForm">+ Aggiungi Media/Press</button>
-                <div id="addMediaForm" class="collapse mt-2">
-                    <form method="POST" action="{{ route('admin.media.store') }}" class="row g-2">
-                        @csrf
-                        <div class="col-md-8"><input name="title" class="form-control" placeholder="Titolo" required></div>
-                        <div class="col-md-4"><input name="link_url" class="form-control" placeholder="Link (https://)"></div>
-                        <div class="col-md-12"><input name="summary" class="form-control" placeholder="Sommario"></div>
-                        <div class="col-12"><button class="btn btn-primary">Salva</button></div>
-                    </form>
-                </div>
-            </div>
-            @endif
-            <div class="cards reveal">
-                @forelse(($mediaItems ?? collect()) as $m)
-                <article class="project-card">
-                    <h3>{{ $m->title }}</h3>
-                    <p class="mb-2">{{ $m->summary }}</p>
-                    @if($m->link_url && !session('is_admin'))
-                    <a class="btn btn-soft" href="{{ $m->link_url }}" target="_blank">Apri</a>
-                    @endif
-                    @if(session('is_admin'))
-                    <div class="mt-2">
-                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#editMedia{{$m->id}}">Modifica</button>
-                        <form method="POST" action="{{ route('admin.media.destroy', $m) }}" style="display:inline" onsubmit="return confirm('Eliminare elemento media?');">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger">Elimina</button>
-                        </form>
-                    </div>
-                    <div id="editMedia{{$m->id}}" class="collapse mt-2">
-                        <form method="POST" action="{{ route('admin.media.update', $m) }}" class="row g-2">
-                            @csrf
-                            @method('PUT')
-                            <div class="col-md-8"><input name="title" class="form-control" value="{{ $m->title }}" required></div>
-                            <div class="col-md-4"><input name="link_url" class="form-control" value="{{ $m->link_url }}" placeholder="Link (https://)"></div>
-                            <div class="col-md-12"><input name="summary" class="form-control" value="{{ $m->summary }}" placeholder="Sommario"></div>
-                            <div class="col-12"><button class="btn btn-primary btn-sm">Salva modifiche</button></div>
-                        </form>
-                    </div>
-                    @endif
-                </article>
-                @empty
+            <h2 id="media-title" style="text-align:center;">Media / Press</h2>
+            <div class="cards">
                 <article class="project-card">
                     <h3>“Algoritmi a supporto della psichiatria di consultazione”</h3>
                     <p class="mb-2">Intervista sul ruolo dei modelli predittivi nella pratica clinica ospedaliera.</p>
                 </article>
+
                 <article class="project-card">
                     <h3>“Scale adattive: meno domande, stessa accuratezza”</h3>
                     <p class="mb-2">Approfondimento su IRT e Computerized Adaptive Testing.</p>
                 </article>
+
                 <article class="project-card">
                     <h3>“Dati, etica e trasparenza in sanità”</h3>
                     <p class="mb-2">Panel con clinici e data scientist sul tema explainability.</p>
                 </article>
-                @endforelse
             </div>
         </div>
     </section>
@@ -940,60 +649,9 @@
     <!-- BLOG -->
     <section id="blog" class="blog" aria-labelledby="blog-title">
         <div class="container">
-            <h2 id="blog-title" style="text-align:center;">{{ __('common.sections.blog') }}</h2>
+            <h2 id="blog-title" style="text-align:center;">Blog</h2>
 
-            <div class="section-title"><span class="accent"></span></div>
-            @if(session('is_admin'))
-            <div class="mb-3">
-                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addBlogForm">+ Aggiungi Post</button>
-                <div id="addBlogForm" class="collapse mt-2">
-                    <form method="POST" action="{{ route('admin.blog.store') }}" class="row g-2">
-                        @csrf
-                        <div class="col-md-4"><input name="published_at_text" class="form-control" placeholder="Data (es. 05 settembre 2025)"></div>
-                        <div class="col-md-8"><input name="title" class="form-control" placeholder="Titolo" required></div>
-                        <div class="col-md-12"><input name="excerpt" class="form-control" placeholder="Estratto"></div>
-                        <div class="col-md-8"><input name="link_url" class="form-control" placeholder="Link (https://)"></div>
-                        <div class="col-md-4"><input name="link_label" class="form-control" placeholder="Etichetta link (es. Leggi)"></div>
-                        <div class="col-12"><button class="btn btn-primary">Salva</button></div>
-                    </form>
-                </div>
-            </div>
-            @endif
-            <div class="cards reveal">
-                @forelse(($blogPosts ?? collect()) as $b)
-                <article class="project-card">
-                    @if($b->published_at_text)
-                    <div class="text-muted mb-1">{{ $b->published_at_text }}</div>
-                    @endif
-                    <h3>{{ $b->title }}</h3>
-                    <p>{{ $b->excerpt }}</p>
-                    @if($b->link_url && !session('is_admin'))
-                        <a class="btn btn-outline" href="{{ $b->link_url }}" target="_blank">{{ $b->link_label ?? 'Leggi' }}</a>
-                    @endif
-                    @if(session('is_admin'))
-                    <div class="mt-2">
-                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#editBlog{{$b->id}}">Modifica</button>
-                        <form method="POST" action="{{ route('admin.blog.destroy', $b) }}" style="display:inline" onsubmit="return confirm('Eliminare il post?');">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger">Elimina</button>
-                        </form>
-                    </div>
-                    <div id="editBlog{{$b->id}}" class="collapse mt-2">
-                        <form method="POST" action="{{ route('admin.blog.update', $b) }}" class="row g-2">
-                            @csrf
-                            @method('PUT')
-                            <div class="col-md-4"><input name="published_at_text" class="form-control" value="{{ $b->published_at_text }}" placeholder="Data"></div>
-                            <div class="col-md-8"><input name="title" class="form-control" value="{{ $b->title }}" required></div>
-                            <div class="col-md-12"><input name="excerpt" class="form-control" value="{{ $b->excerpt }}" placeholder="Estratto"></div>
-                            <div class="col-md-8"><input name="link_url" class="form-control" value="{{ $b->link_url }}" placeholder="Link (https://)"></div>
-                            <div class="col-md-4"><input name="link_label" class="form-control" value="{{ $b->link_label }}" placeholder="Etichetta link"></div>
-                            <div class="col-12"><button class="btn btn-primary btn-sm">Salva modifiche</button></div>
-                        </form>
-                    </div>
-                    @endif
-                </article>
-                @empty
+            <div class="cards">
                 <article class="project-card">
                     <div class="text-muted mb-1">05 settembre 2025</div>
                     <h3>Come passare da un item bank all’IRT operativo in produzione</h3>
@@ -1014,92 +672,14 @@
                     <p>Feature importance, controparti locali e limiti da comunicare.</p>
                     <a class="btn btn-outline" href="#">Leggi</a>
                 </article>
-                @endforelse
             </div>
         </div>
     </section>
 
     <section id="team" class="team">
         <div class="container">
-            <h2 style="text-align: center;">{{ __('common.sections.team') }}</h2>
-            <div class="section-title"><span class="accent"></span></div>
-            @if(session('is_admin'))
-            <div class="mb-3">
-                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addTeamForm">+ Aggiungi Membro</button>
-                <div id="addTeamForm" class="collapse mt-2">
-                    <form method="POST" action="{{ route('admin.team.store') }}" class="row g-2" enctype="multipart/form-data">
-                        @csrf
-                        <div class="col-md-4"><input name="name" class="form-control" placeholder="Nome" required></div>
-                        <div class="col-md-4"><input name="role" class="form-control" placeholder="Ruolo"></div>
-                        <div class="col-md-4">
-                            <div class="dropzone text-muted border rounded p-3 text-center" role="button" data-input="teamImageNew">
-                                Trascina qui la foto o clicca
-                                <div class="small">PNG/JPG fino a 4MB</div>
-                            </div>
-                            <input type="file" id="teamImageNew" name="image" accept="image/*" class="d-none">
-                        </div>
-                        <div class="col-md-4"><input name="image_alt" class="form-control" placeholder="Alt immagine"></div>
-                        <div class="col-md-8">
-                            <div class="row g-2">
-                                <div class="col-md-4"><input name="github_url" class="form-control" placeholder="GitHub URL"></div>
-                                <div class="col-md-4"><input name="linkedin_url" class="form-control" placeholder="LinkedIn URL"></div>
-                                <div class="col-md-4"><input name="twitter_url" class="form-control" placeholder="Twitter/X URL"></div>
-                            </div>
-                        </div>
-                        <div class="col-12"><button class="btn btn-primary">Salva</button></div>
-                    </form>
-                </div>
-            </div>
-            @endif
+            <h2 style="text-align: center;">Il nostro Team</h2>
             <div class="cards">
-                @forelse(($team ?? collect()) as $m)
-                <div class="card">
-                    <img src="{{ $m->image_url ?? 'profile.png' }}" alt="{{ $m->image_alt ?? $m->name }}" />
-                    <div class="card-body">
-                        <h3>{{ $m->name }}</h3>
-                        <p class="role">{{ $m->role }}</p>
-                        <div class="social">
-                            @if($m->github_url)<a href="{{ $m->github_url }}" target="_blank"><i class="fab fa-github"></i></a>@endif
-                            @if($m->linkedin_url)<a href="{{ $m->linkedin_url }}" target="_blank"><i class="fab fa-linkedin"></i></a>@endif
-                            @if($m->twitter_url)<a href="{{ $m->twitter_url }}" target="_blank"><i class="fab fa-twitter"></i></a>@endif
-                        </div>
-                        @if(session('is_admin'))
-                        <div class="mt-2">
-                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#editTeam{{$m->id}}">Modifica</button>
-                            <form method="POST" action="{{ route('admin.team.destroy', $m) }}" style="display:inline" onsubmit="return confirm('Eliminare il membro del team?');">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger">Elimina</button>
-                            </form>
-                        </div>
-                        <div id="editTeam{{$m->id}}" class="collapse mt-2">
-                            <form method="POST" action="{{ route('admin.team.update', $m) }}" class="row g-2" enctype="multipart/form-data">
-                                @csrf
-                                @method('PUT')
-                                <div class="col-md-4"><input name="name" class="form-control" value="{{ $m->name }}" required></div>
-                                <div class="col-md-4"><input name="role" class="form-control" value="{{ $m->role }}"></div>
-                                <div class="col-md-4">
-                                    <div class="dropzone text-muted border rounded p-3 text-center" role="button" data-input="teamImageEdit{{$m->id}}">
-                                        Trascina qui per sostituire la foto
-                                        <div class="small">PNG/JPG fino a 4MB</div>
-                                    </div>
-                                    <input type="file" id="teamImageEdit{{$m->id}}" name="image" accept="image/*" class="d-none">
-                                </div>
-                                <div class="col-md-4"><input name="image_alt" class="form-control" value="{{ $m->image_alt }}" placeholder="Alt immagine"></div>
-                                <div class="col-md-8">
-                                    <div class="row g-2">
-                                        <div class="col-md-4"><input name="github_url" class="form-control" value="{{ $m->github_url }}" placeholder="GitHub URL"></div>
-                                        <div class="col-md-4"><input name="linkedin_url" class="form-control" value="{{ $m->linkedin_url }}" placeholder="LinkedIn URL"></div>
-                                        <div class="col-md-4"><input name="twitter_url" class="form-control" value="{{ $m->twitter_url }}" placeholder="Twitter/X URL"></div>
-                                    </div>
-                                </div>
-                                <div class="col-12"><button class="btn btn-primary btn-sm">Salva modifiche</button></div>
-                            </form>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-                @empty
                 <div class="card">
                     <img src="profile.png" alt="Prof. Lorem Ipsum" />
                     <div class="card-body">
@@ -1136,14 +716,13 @@
                         </div>
                     </div>
                 </div>
-                @endforelse
             </div>
         </div>
     </section>
 
     <section id="contact" class="contact">
         <div class="container">
-            <h2 style="text-align: center;">{{ __('common.sections.contact') }}</h2>
+            <h2 style="text-align: center;">Contatti</h2>
             <div class="project-card" style="padding: 0;">
                 <div class="map-container">
                     <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=11.6300,44.8355,11.6340,44.8380&amp;layer=mapnik&amp;marker=44.8369449,11.6320699"
@@ -1162,23 +741,24 @@
 
     <footer class="site-footer">
         <div class="container d-flex justify-content-between align-items-center flex-wrap py-4">
-            <div class="footer-logo">{{ __('common.brand') }}</div>
+            <div class="footer-logo">COMP-PSY</div>
             <div class="footer-links">
-                <a href="#">{{ __('common.footer.cookie') }}</a> / <a href="#">{{ __('common.footer.privacy') }}</a> • <span id="foot-year"></span>
+                <a href="#">Cookie</a> / <a href="#">Privacy</a> • <span id="foot-year"></span>
             </div>
         </div>
     </footer>
 
+</body>
+
+</html>
+
 <script>
     
     function changeLanguage(locale) {
-        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         fetch("{{ route('set.language.ajax') }}", {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token,
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     locale
@@ -1226,62 +806,6 @@
     });
 
     document.getElementById('foot-year').textContent = new Date().getFullYear();
-  
-    // Drag & drop image helper for file inputs
-    document.querySelectorAll('.dropzone').forEach(zone => {
-        const inputId = zone.getAttribute('data-input');
-        const input = document.getElementById(inputId);
-        if (!input) return;
-        const updateLabel = (file) => {
-            if (!file) return;
-            zone.innerHTML = `${file.name}`;
-        };
-        zone.addEventListener('click', () => input.click());
-        zone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            zone.classList.add('border-primary');
-        });
-        zone.addEventListener('dragleave', () => zone.classList.remove('border-primary'));
-        zone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            zone.classList.remove('border-primary');
-            if (e.dataTransfer.files && e.dataTransfer.files.length) {
-                input.files = e.dataTransfer.files;
-                updateLabel(e.dataTransfer.files[0]);
-            }
-        });
-        input.addEventListener('change', () => updateLabel(input.files && input.files[0]));
-    });
-    
-    // Reveal on scroll (simple observer)
-    const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-            if (e.isIntersecting) {
-                e.target.classList.add('show');
-                io.unobserve(e.target);
-            }
-        });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-    // Nav active on scroll
-    const sectionsMap = ['projects','events','pubb','media','blog','team','contact']
-        .map(id => ({ id, el: document.getElementById(id) }))
-        .filter(x => !!x.el);
-    const navLinks = Array.from(document.querySelectorAll('.nav-link.scroll-link'));
-    const setActive = (id) => {
-        navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('data-target') === id));
-    };
-    const handleScroll = () => {
-        const fromTop = window.scrollY + 120;
-        let current = sectionsMap[0]?.id;
-        for (const s of sectionsMap) {
-            if (s.el.offsetTop <= fromTop) current = s.id; else break;
-        }
-        if (current) setActive(current);
-    };
-    document.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
   
 </script>
 </body>
