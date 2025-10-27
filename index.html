@@ -3,76 +3,213 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Michele Specchia — Software Developer · Machine Learning</title>
+    <title>Michele Specchia</title>
     <meta name="description" content="Portfolio personale di Michele Specchia: progetti, contatti e interessi in sviluppo software e machine learning." />
     <link rel="stylesheet" href="styles.css" />
   </head>
+  <!-- Chat bubble + panel -->
+<div id="chat-bubble" aria-label="Apri chat" title="Apri chat">💬</div>
+<div id="chat-panel" hidden role="dialog" aria-label="Assistente AI">
+  <div id="chat-header">
+    <strong>Assistant</strong>
+    <button id="chat-close" aria-label="Chiudi">×</button>
+  </div>
+  <div id="chat-history" aria-live="polite"></div>
+  <form id="chat-form" autocomplete="off">
+    <input id="chat-input" placeholder="Scrivi qui…" />
+    <button type="submit">Invia</button>
+  </form>
+</div>
+
   <body>
     <div class="backdrop" aria-hidden="true"></div>
-    <main class="card" role="main">
+    <canvas id="fx" aria-hidden="true"></canvas>
+    <main class="page" role="main">
       <header class="hero">
-        <p class="prompt">&gt;_ Ciao, sono</p>
-        <h1 class="name">Michele Specchia</h1>
-        <p class="roles">Software Developer<br />Machine Learning</p>
+        <p class="prompt" id="prompt" data-text=">_ Hi, I'm">
+          <span id="typed-prompt">&gt;_ Hi, I'm</span>
+        </p>
+        <h1 class="name" id="name" data-text="Michele Specchia">
+          <span id="typed-name">Michele Specchia</span><span class="caret" aria-hidden="true"></span>
+        </h1>
+        <div class="terminal" role="region" aria-label="Terminale">
+          <div class="term-row">
+            <span class="term-sign">$</span>
+            <input id="cmd" class="term-input" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="Ask me anything…" aria-label="Digita un comando" />
+          </div>
+        </div>
       </header>
-
-      <section class="projects" aria-labelledby="projects-title">
-        <h2 id="projects-title">Projects</h2>
-        <ul class="project-list">
-          <li class="project">
-            <a href="#" class="project-name">Project One</a>
-            <div class="tags">
-              <span>[Python]</span>
-              <span>[Pandas]</span>
-              <span>[Scikit-Learn]</span>
-            </div>
-          </li>
-          <li class="project">
-            <a href="#" class="project-name">Project Two</a>
-            <div class="tags">
-              <span>[JavaScript]</span>
-              <span>[React]</span>
-              <span>[Node.js]</span>
-            </div>
-          </li>
-          <li class="project">
-            <a href="#" class="project-name">Project Three</a>
-            <div class="tags">
-              <span>[Machine Learning]</span>
-              <span>[TensorFlow]</span>
-              <span>[Python]</span>
-            </div>
-          </li>
-          <li class="project">
-            <a href="#" class="project-name">Project Four</a>
-            <div class="tags">
-              <span>[C++]</span>
-              <span>[OpenCV]</span>
-              <span>[PyTorch]</span>
-            </div>
-          </li>
-        </ul>
-      </section>
 
       <footer class="footer">
         <hr class="rule" />
         <p class="footline">
-          <span aria-label="copyright">©</span>
+          <span aria-label="copyright">&copy;</span>
           <span id="year"></span>
           <span class="owner">Michele Specchia</span>
-          <span class="spacer">·</span>
+          <span class="spacer">|</span>
           <a href="privacy.html">Privacy</a>
-          <span class="spacer">·</span>
+          <span class="spacer">|</span>
           <a href="contact.html">Contact</a>
         </p>
       </footer>
     </main>
 
-    <script>
-      // Aggiorna automaticamente l'anno nel footer
-      document.getElementById('year').textContent = new Date().getFullYear();
-    </script>
+    <script src="script.js" defer></script>
+    <script type="module">
+  import { pipeline } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2";
+
+  // ===== UI refs =====
+  const bubble = document.getElementById('chat-bubble');
+  const panel  = document.getElementById('chat-panel');
+  const close  = document.getElementById('chat-close');
+  const hist   = document.getElementById('chat-history');
+  const form   = document.getElementById('chat-form');
+  const input  = document.getElementById('chat-input');
+  const termIn = document.getElementById('cmd'); // terminal input già presente nella tua pagina
+
+  bubble.onclick = () => panel.hidden = !panel.hidden;
+  close.onclick  = () => panel.hidden = true;
+
+  function addMsg(text, cls){
+    const d=document.createElement('div'); d.className=cls; d.textContent=text;
+    hist.appendChild(d); hist.scrollTop = hist.scrollHeight;
+    return d;
+  }
+
+  // ===== Istruzioni del modello =====
+  const MODEL = "Xenova/Qwen2.5-0.5B-Instruct"; // leggero, gira nel browser
+  const systemPrompt = `
+Sei l’assistente del portfolio di Michele Specchia.
+Regole:
+- Rispondi in italiano, tono professionale ma amichevole, frasi brevi.
+- Usa prima il CONTEXT fornito; se mancano dati, dillo chiaramente e chiedi 1 chiarimento.
+- Non inventare link o numeri. Se non sai, ammettilo.
+- Quando utile, usa elenchi puntati. Evita emoji salvo richiesta esplicita.
+`.trim();
+
+  // ===== Few-shot (stile risposta) =====
+  const fewShots = [
+    { user: "Chi sei?", assistant: "Sono l’assistente del sito di Michele Specchia. Posso spiegarti progetti, competenze e come contattarlo." },
+    { user: "Su cosa lavori?", assistant: "Sviluppo full-stack (Laravel, PHP 8.2), app con Expo/React Native, e ricerca ML su benessere mentale." }
+  ];
+
+  // ===== Mini Knowledge Base (espandila quando vuoi) =====
+  const KB = [
+    { title: "COMP-PSY", text: "Piattaforma Laravel per test cognitivi e raccolta dati clinici. Frontend Blade/Bootstrap, API per app mobile. Hosting Aruba (Apache, PHP 8.2)." },
+    { title: "DK-app", text: "App Expo React Native per benessere mentale: questionari, dashboard, grafici. Build EAS, Gradle 8.x, Google Play Console." },
+    { title: "Ricerca ML", text: "Modelli GLM/DT/RF su dataset SHARE, outcome EURO-D. AUPRC ~0.65; decision curve analysis per valutare net benefit." },
+    { title: "Contatti", text: "Sito: michelespecchia.github.io — preferenze: progetti full-stack e salute digitale." }
+  ];
+
+  // ===== Retrieval semplicissimo (parole in comune) =====
+  function retrieve(query, k = 3) {
+    const q = norm(query);
+    const scored = KB.map((doc, i) => {
+      const t = norm(doc.title + " " + doc.text);
+      const score = intersectSize(q, t) / Math.max(1, t.size);
+      return { i, score };
+    }).sort((a,b)=> b.score - a.score);
+    return scored.slice(0, k).filter(s => s.score > 0).map(s => KB[s.i]);
+  }
+  function norm(s){ return new Set((s||"").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").split(/\s+/).filter(Boolean)); }
+  function intersectSize(a,b){ let n=0; for(const w of a) if(b.has(w)) n++; return n; }
+
+  // ===== Caricamento modello =====
+  addMsg("Carico il modello nel browser (la prima volta può richiedere un po')…", "msg-bot");
+  let pipe;
+  try {
+    pipe = await pipeline("text-generation", MODEL, {
+      dtype: "q8",       // prova quantizzato se disponibile
+      device: "webgpu",  // WebGPU quando possibile, fallback a wasm
+    });
+    // Messaggio di pronto
+    addMsg("Pronto! Scrivi il tuo messaggio qui o nella casella 'Ask me anything…' in alto.", "msg-bot");
+  } catch (e) {
+    addMsg("Impossibile inizializzare WebGPU: provo fallback. Se non va, usa Chrome/Edge aggiornato.", "msg-bot");
+    pipe = await pipeline("text-generation", MODEL); // fallback di default
+  }
+
+  // ===== Stato conversazione =====
+  const messages = [{ role: "system", content: systemPrompt }];
+
+  function buildPrompt(user) {
+    const ctxDocs = retrieve(user, 3);
+    const contextBlock = ctxDocs.length
+      ? "CONTEXT (dal sito):\n" + ctxDocs.map(d => `- ${d.title}: ${d.text}`).join("\n")
+      : "CONTEXT: (nessuna voce trovata)";
+
+    const shots = fewShots.map(ex => `User: ${ex.user}\nAssistant: ${ex.assistant}`).join("\n");
+
+    const history = messages.slice(1) // esclude il system
+      .map(m => (m.role === "user" ? `User: ${m.content}` : `Assistant: ${m.content}`))
+      .join("\n");
+
+    return [
+      `System: ${systemPrompt}`,
+      contextBlock,
+      shots,
+      history,
+      `User: ${user}`,
+      "Assistant:"
+    ].filter(Boolean).join("\n\n");
+  }
+
+  function postprocess(t){
+    return t.replace(/Assistant:\s*/gi,"").replace(/\n{3,}/g,"\n\n").trim();
+  }
+
+  async function askLLM(userText) {
+    messages.push({ role: "user", content: userText });
+    const prompt = buildPrompt(userText);
+
+    let out = "";
+    const typingNode = addMsg("…", "msg-bot");
+
+    for await (const chunk of pipe(prompt, {
+      max_new_tokens: 220,
+      temperature: 0.6,
+      top_p: 0.9,
+      stop: ["\nUser:"],
+      callback_function: (x) => {
+        if (x.token) {
+          out += x.token.text;
+          typingNode.textContent = out;
+          hist.scrollTop = hist.scrollHeight;
+        }
+      }
+    })) { /* streaming gestito nel callback */ }
+
+    const finalText = postprocess(out);
+    typingNode.textContent = finalText || "(nessuna risposta)";
+    messages.push({ role: "assistant", content: finalText });
+  }
+
+  // ===== Invio dal pannello chat =====
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const q = (input.value || "").trim();
+    if (!q) return;
+    addMsg(q, "msg-user");
+    input.value = "";
+    await askLLM(q);
+  });
+
+  // ===== Invio dalla “console” in header (il tuo #cmd) =====
+  if (termIn) {
+    termIn.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter') {
+        const q = (termIn.value || "").trim();
+        if (!q) return;
+        // Apri il pannello (così vedi le risposte)
+        panel.hidden = false;
+        addMsg(`$ ${q}`, "msg-user");
+        termIn.value = "";
+        await askLLM(q);
+      }
+    });
+  }
+</script>
+
   </body>
   
 </html>
-
