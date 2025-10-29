@@ -444,6 +444,27 @@ document.addEventListener('DOMContentLoaded', () => {
     let modelToLoad = chosen?.modelId;
     let initOptions = options;
     const onlineCapable = (location.protocol === 'https:');
+
+    // Rileva repository GitHub Pages con file modello tracciati via LFS (pointer di ~100 byte)
+    // e in tal caso forza il fallback al modello remoto
+    if (modelToLoad && initOptions && initOptions.appConfig && initOptions.appConfig.model_list && initOptions.appConfig.model_list[0] && initOptions.appConfig.model_list[0].model && onlineCapable) {
+      try {
+        const base = initOptions.appConfig.model_list[0].model; // URL assoluto della cartella resolve/main
+        const shardUrl = new URL('params_shard_0.bin', base).href;
+        const resp = await fetch(shardUrl, { method: 'HEAD', cache: 'no-store' });
+        if (resp && resp.ok) {
+          const len = parseInt(resp.headers.get('content-length') || '0', 10);
+          const ct = (resp.headers.get('content-type') || '').toLowerCase();
+          const looksLikeLFSPointer = (len > 0 && len < 10000) || ct.includes('text/plain');
+          if (looksLikeLFSPointer) {
+            pushLine('ai', 'Rilevati file modello serviti come pointer (Git LFS). Passo al modello remoto.');
+            modelToLoad = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
+            initOptions = {}; // usa prebuiltAppConfig
+          }
+        }
+      } catch (_) { /* ignora e continua */ }
+    }
+
     if (!modelToLoad && onlineCapable) {
       modelToLoad = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
       initOptions = {};
