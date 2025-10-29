@@ -447,6 +447,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Rileva repository GitHub Pages con file modello tracciati via LFS (pointer di ~100 byte)
     // e in tal caso forza il fallback al modello remoto
+    const urlParams = new URLSearchParams(location.search);
+    const preferTiny = urlParams.has('fast') || (urlParams.get('model')||'').toLowerCase()==='tiny';
     if (modelToLoad && initOptions && initOptions.appConfig && initOptions.appConfig.model_list && initOptions.appConfig.model_list[0] && initOptions.appConfig.model_list[0].model && onlineCapable) {
       try {
         const base = initOptions.appConfig.model_list[0].model; // URL assoluto della cartella resolve/main
@@ -458,16 +460,16 @@ document.addEventListener('DOMContentLoaded', () => {
           const looksLikeLFSPointer = (len > 0 && len < 10000) || ct.includes('text/plain');
           if (looksLikeLFSPointer) {
             pushLine('ai', 'Rilevati file modello serviti come pointer (Git LFS). Passo al modello remoto.');
-            modelToLoad = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
-            initOptions = {}; // usa prebuiltAppConfig
+            modelToLoad = preferTiny ? 'TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC-1k' : 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
+            initOptions = { appConfig: { useIndexedDBCache: true } }; // usa prebuiltAppConfig + cache persistente
           }
         }
       } catch (_) { /* ignora e continua */ }
     }
 
     if (!modelToLoad && onlineCapable) {
-      modelToLoad = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
-      initOptions = {};
+      modelToLoad = preferTiny ? 'TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC-1k' : 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
+      initOptions = { appConfig: { useIndexedDBCache: true } };
       pushLine('ai', `Caricamento modello remoto: ${modelToLoad}...`);
     }
     if (!modelToLoad) {
