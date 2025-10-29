@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function help() {
-    pushLine('ai', "Comandi: help, clear, ingest, diag, ctx. Scrivi e premi Invio per chattare. Su GitHub Pages usa ?online=1 per caricare libreria e modello da CDN.");
+    pushLine('ai', "Comandi: help, clear, ingest, diag, ctx. Parole chiave: bio, missione/valori, competenze | skills | linguaggi | stack | tecnologie, progetti | portfolio, esperienza, formazione, contatti | email | github | linkedin. Su GitHub Pages usa ?online=1 per usare i CDN.");
   }
 
   async function diag() {
@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let engine = null;
   const history = [{ role: 'system', content: 'Parla in italiano. Rispondi in modo breve, chiaro e professionale. Regola: usa SOLO il Contesto fornito; se l\'informazione non è nel Contesto rispondi esattamente: "Non presente nel profilo".' }];
   // Persona: rispondi come Michele in prima persona
-  history[0].content = 'Sei Michele Specchia. Rispondi sempre in prima persona ("io"). Parla in italiano in modo breve, chiaro e professionale. Usa SOLO il CONTESTO fornito (estratto dal mio profilo); se l\'informazione non è nel CONTESTO rispondi esattamente: "Non presente nel profilo". Evita preamboli e riferimenti al fatto di essere un modello.';
+  history[0].content = 'Sei Michele Specchia. Rispondi sempre in prima persona ("io"). Parla in italiano in modo breve, chiaro e professionale. Usa SOLO il CONTESTO fornito (estratto dal mio profilo). Se qualcosa non è nel CONTESTO, non improvvisare: rispondi in modo neutro (ad esempio: "Non saprei rispondere con certezza su questo") e proponi un tema del profilo di cui puoi parlare. Evita preamboli e riferimenti al fatto di essere un modello.';
 
   async function loadWebLLMIfNeeded() {
     if (window.webllm) return true;
@@ -362,8 +362,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       if (window.webllm) { pushLine('ai', `Libreria caricata da ${umd}`); return true; }
     } catch {}
-    // Se siamo su GitHub Pages o ?online=1, prova CDN
-    if (allowOnline) {
+    // Fallback CDN (GitHub Pages o qualsiasi HTTPS). Le CDN funzionano solo su HTTPS.
+    const onlineCapable = (location.protocol === 'https:');
+    if (onlineCapable) {
       const cdns = [
         'https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/dist/webllm.min.js',
         'https://unpkg.com/@mlc-ai/web-llm/dist/webllm.min.js'
@@ -379,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch {}
       }
     }
-    pushLine('ai', "Libreria WebLLM non trovata. In locale: servi 'node_modules/@mlc-ai/web-llm/lib/index.js' o copia in 'libs/webllm/'. Online: aggiungi ?online=1 o pubblica su GitHub Pages.");
+    pushLine('ai', "Libreria WebLLM non trovata. In locale: servi 'node_modules/@mlc-ai/web-llm/lib/index.js' o copia in 'libs/webllm/'. Online: apri via HTTPS (GitHub Pages) per usare la CDN automaticamente.");
     return false;
   }
 
@@ -442,7 +443,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     let modelToLoad = chosen?.modelId;
     let initOptions = options;
-    if (!modelToLoad && allowOnline) {
+    const onlineCapable = (location.protocol === 'https:');
+    if (!modelToLoad && onlineCapable) {
       modelToLoad = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
       initOptions = {};
       pushLine('ai', `Caricamento modello remoto: ${modelToLoad}...`);
@@ -498,16 +500,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.__ragReady && typeof window.__ragSearch === 'function') {
       const hits = window.__ragSearch(userText);
       window.__lastCtx = hits;
-      // Costruisci il contesto: se troppo scarso, integra con un baseline del profilo
-      let ctxItems = (hits || []).map(h=>h.text);
+      // Costruisci il contesto: 1) routing per keyword note, 2) RAG, 3) baseline
+      let ctxItems = [];
+      if (typeof window.__ragRoute === 'function') {
+        const routed = window.__ragRoute(userText) || [];
+        ctxItems.push(...routed);
+      }
+      ctxItems.push(...(hits || []).map(h=>h.text));
       if (ctxItems.length < 3 && typeof window.__ragBaseline === 'function') {
         const base = window.__ragBaseline();
         for (const b of base){ if(!ctxItems.includes(b)) ctxItems.push(b); }
       }
       if (ctxItems.length) {
         const ctx = ctxItems.slice(0,6).map((t,i)=>`[${i+1}] ${t}`).join('\\n\\n');
+        window.__lastCtxStr = ctx;
         const baseSys = messages[0] && messages[0].role === 'system' ? messages[0].content : '';
-        messages[0] = { role: 'system', content: `${baseSys}\\n\\nCONTESTO:\\n${ctx}\\n\\nISTRUZIONI: Rispondi solo usando il CONTESTO; se un dettaglio non è nel CONTESTO scrivi esattamente \'Non presente nel profilo\'. Formato: massimo 3 frasi o un elenco puntato molto breve.`.trim() };
+        messages[0] = { role: 'system', content: `${baseSys}\\n\\nCONTESTO:\\n${ctx}\\n\\nISTRUZIONI: Rispondi solo usando il CONTESTO. Se qualcosa non è nel CONTESTO, non improvvisare: rispondi in modo neutro (es. \'Non saprei rispondere con certezza su questo\') e proponi un tema del profilo pertinente. Formato: massimo 3 frasi o un elenco molto breve.`.trim() };
       }
     }
     messages.push({ role: 'user', content: userText });
@@ -529,7 +537,36 @@ document.addEventListener('DOMContentLoaded', () => {
           log.scrollTop = log.scrollHeight;
         }
       }
-      const cleaned = sanitize(full);
+      function finalize(text, question){
+        let t = sanitize(text).replace(/\bNon presente nel profilo\.?/gi,'');
+        const ctx = window.__lastCtxStr || '';
+        if (!/freelance/i.test(ctx)) {
+          t = t.replace(/[^.!?]*freelance[^.!?]*[.!?]/gi,'');
+        }
+        // Evita frasi da "modello di linguaggio" o similari e "non so" ripetute
+        t = t.replace(/[^.!?]*\b(modello di linguaggio|language model|modello|ai)\b[^.!?]*[.!?]/gi,'');
+        t = t.replace(/[^.!?]*\bnon\s+so\b[^.!?]*[.!?]/gi,'');
+        t = t.trim();
+        const q = (question||'').toLowerCase();
+        function firstSentences(s, n){ const a=(s||'').split(/(?<=[.!?])\s+/).filter(Boolean); return a.slice(0,n).join(' '); }
+        function fallbackIntro(){
+          const getSec = window.__ragGetSection ? window.__ragGetSection : ()=>'';
+          const bio = getSec('bio') || getSec('missione e valori') || '';
+          if (bio) return firstSentences(bio, 2);
+          // usa baseline generico
+          const base = (window.__ragBaseline ? window.__ragBaseline(2) : []) || [];
+          return base.length ? firstSentences(base[0], 2) : 'Posso raccontarti di bio, competenze, progetti o contatti.';
+        }
+        if (t.length < 40) {
+          // se la domanda riguarda origine/luogo e non c'è dato nel profilo
+          if (/\b(dove|provieni|origine|origini|nato|provenienza)\b/i.test(q)) {
+            return 'Preferisco non entrare nei dettagli sulla provenienza qui. ' + fallbackIntro();
+          }
+          return (t ? t + ' ' : '') + 'Non saprei rispondere con certezza su questo. ' + fallbackIntro();
+        }
+        return t;
+      }
+      const cleaned = finalize(full, userText);
       history.push({ role: 'user', content: userText });
       history.push({ role: 'assistant', content: cleaned });
     } catch (err) {
@@ -561,8 +598,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const rag = { ready:false };
     const LS_MD = 'rag_profile_md_v1';
     const LS_INDEX = 'rag_profile_idx_v1';
-    function saveToLocal(md){ try{ const data={ docs:rag.docs, ids:rag.ids, idf:[...rag.idf.entries()], vecs: rag.vecs.map(v=>[...v.entries()]), norms: rag.norm }; localStorage.setItem(LS_INDEX, JSON.stringify(data)); localStorage.setItem(LS_MD, md); }catch(_){} }
-    function loadFromLocal(){ try{ const json=localStorage.getItem(LS_INDEX); if(!json) return false; const data=JSON.parse(json); rag.docs=data.docs||[]; rag.ids=data.ids||[]; rag.idf=new Map(data.idf||[]); rag.vecs=(data.vecs||[]).map(e=>new Map(e)); rag.norm=data.norms||[]; rag.ready=true; window.__ragReady=true; return true; }catch(_){ return false; } }
+    function saveToLocal(md){ try{ const data={ docs:rag.docs, ids:rag.ids, idf:[...rag.idf.entries()], vecs: rag.vecs.map(v=>[...v.entries()]), norms: rag.norm, sections: rag.sections||{} }; localStorage.setItem(LS_INDEX, JSON.stringify(data)); localStorage.setItem(LS_MD, md); }catch(_){} }
+    function loadFromLocal(){ try{ const json=localStorage.getItem(LS_INDEX); if(!json) return false; const data=JSON.parse(json); rag.docs=data.docs||[]; rag.ids=data.ids||[]; rag.idf=new Map(data.idf||[]); rag.vecs=(data.vecs||[]).map(e=>new Map(e)); rag.norm=data.norms||[]; rag.sections=data.sections||{}; rag.ready=true; window.__ragReady=true; return true; }catch(_){ return false; } }
     function build(chunks){
       const N=chunks.length; const df=new Map(); const tfs=[]; rag.docs=chunks.map(c=>c.text); rag.ids=chunks.map(c=>c.id);
       for(const c of chunks){ const tf=new Map(); for(const t of tok(c.text)){ tf.set(t,(tf.get(t)||0)+1) } tfs.push(tf); for(const t of tf.keys()){ df.set(t,(df.get(t)||0)+1) } }
@@ -570,16 +607,37 @@ document.addEventListener('DOMContentLoaded', () => {
       rag.vecs=[]; rag.norm=[]; for(const tf of tfs){ let norm=0; const v=new Map(); for(const [t,c] of tf){ const w=(1+Math.log(c))*(rag.idf.get(t)||0); if(w>0){ v.set(t,w); norm+=w*w } } rag.vecs.push(v); rag.norm.push(Math.sqrt(norm)||1) }
       rag.ready=true; window.__ragReady=true;
     }
-    async function ingest(){ try{ const r=await fetch('data/profile.md',{cache:'no-store'}); if(!r.ok){ pushLine('ai','Nessun profilo in data/profile.md'); return;} const md=await r.text(); build(split(md)); saveToLocal(md); pushLine('ai', `Profilo indicizzato (${rag.docs.length} frammenti).`);}catch(e){ pushLine('ai','Errore ingest: '+(e?.message||e)); } }
+    async function ingest(){ try{ const r=await fetch('data/profile.md',{cache:'no-store'}); if(!r.ok){ pushLine('ai','Nessun profilo in data/profile.md'); return;} const md=await r.text(); rag.sections = parseSections(md); build(split(md)); saveToLocal(md); pushLine('ai', `Profilo indicizzato (${rag.docs.length} frammenti).`);}catch(e){ pushLine('ai','Errore ingest: '+(e?.message||e)); } }
     function search(q){ if(!rag.ready) return []; const tf=new Map(); for(const t of tok(q)){ tf.set(t,(tf.get(t)||0)+1) } let norm=0; for(const [t,c] of tf){ const w=(1+Math.log(c))*(rag.idf.get(t)||0); tf.set(t,w); norm+=w*w } norm=Math.sqrt(norm)||1; const scores=[]; for(let i=0;i<rag.vecs.length;i++){ let dot=0; for(const [t,wq] of tf){ const wd=rag.vecs[i].get(t); if(wd) dot+=wd*wq } const s=dot/(rag.norm[i]*norm); if(s>0) scores.push([s,i]) } scores.sort((a,b)=>b[0]-a[0]); return scores.slice(0,6).map(([s,i])=>({score:s, id:rag.ids[i], text:rag.docs[i]})); }
-    function baseline(k=4){ if(!rag.ready) return []; const out=[]; for(let i=0;i<rag.docs.length && out.length<k;i++){ const t=rag.docs[i]; if(t && t.length>30) out.push(t); } return out; }
+    function baseline(k=4){ if(!rag.ready) return []; const out=[]; const pref=['bio','missione e valori','competenze tecniche','progetti principali']; for(const key of pref){ const t=rag.sections?.[key]; if(t && !out.includes(t)) out.push(t); if(out.length>=k) break; } for(let i=0;i<rag.docs.length && out.length<k;i++){ const t=rag.docs[i]; if(t && t.length>30 && !out.includes(t)) out.push(t); } return out; }
+    function routeByKeyword(q){
+      if(!rag.ready) return [];
+      const norm = (x)=> (x||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/(.)\1{2,}/g,'$1$1');
+      const s = norm(q);
+      const pairs = [
+        [[ 'bio','chi sei','chi sono','chi e','chi è','parlami di te','su di te','presentati','presentazione','about','who are you' ], 'bio'],
+        [[ 'missione','valori','vision','obiettivi','principi' ], 'missione e valori'],
+        [[ 'competenze','skills','linguaggi','stack','tecnologie','framework','tool','strumenti','hard skills' ], 'competenze tecniche'],
+        [[ 'progetti','project','projects','portfolio','repo','repos','case study','demo','lavori','prodotti' ], 'progetti principali'],
+        [[ 'esperienza','carriera','lavoro','ruoli','posizioni','timeline','esperienze lavorative' ], 'esperienza (selezione)'],
+        [[ 'formazione','studio','studi','laurea','universita','università','master','corsi','certificazioni','education' ], 'formazione'],
+        [[ 'contatti','contatto','email','mail','github','git hub','linkedin','social','profilo','profili','referenze','website','sito' ], 'contatti e link'],
+      ];
+      const picked = new Set();
+      for(const [keys,sec] of pairs){
+        for(const k of keys){ if(s.includes(norm(k))){ const t = rag.sections?.[sec]; if(t) picked.add(t); }
+        }
+      }
+      return [...picked];
+    }
     window.__ragIngest = ingest;
     window.__ragSearch = search;
     window.__ragBaseline = baseline;
+    window.__ragRoute = routeByKeyword;
     // Ripristina dalla cache e controlla aggiornamenti del file
     const restored = (typeof localStorage!=='undefined') ? loadFromLocal() : false;
     if (restored) { pushLine('ai', `Profilo caricato dalla cache (${rag.docs.length} frammenti).`); }
-    fetch('data/profile.md',{cache:'no-store'}).then(async r=>{ if(!r.ok) return; const md=await r.text(); const prev=(typeof localStorage!=='undefined') ? (localStorage.getItem(LS_MD)||'') : ''; if(md && md!==prev){ build(split(md)); if(typeof localStorage!=='undefined') saveToLocal(md); pushLine('ai', `Profilo aggiornato (${rag.docs.length} frammenti).`); } });
+    fetch('data/profile.md',{cache:'no-store'}).then(async r=>{ if(!r.ok) return; const md=await r.text(); const prev=(typeof localStorage!=='undefined') ? (localStorage.getItem(LS_MD)||'') : ''; if(md && md!==prev){ rag.sections = (typeof parseSections==='function') ? parseSections(md) : (rag.sections||{}); build(split(md)); if(typeof localStorage!=='undefined') saveToLocal(md); pushLine('ai', `Profilo aggiornato (${rag.docs.length} frammenti).`); } else if(!restored) { rag.sections = (typeof parseSections==='function') ? parseSections(md) : (rag.sections||{}); } });
   })();
   // Avvio automatico del modello all'apertura
   (async()=>{ try{ await ensureEngine(); }catch(_){} })();
