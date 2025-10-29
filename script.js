@@ -263,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ----- Terminal Chat (WebLLM) -----
   const log = document.getElementById('term-log');
   const input = document.getElementById('cmd');
+  const allowOnline = /github\.io$/.test(location.hostname) || new URLSearchParams(location.search).has('online');
   if (!log || !input) return;
 
   function pushLine(role, text = '') {
@@ -280,37 +281,105 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function help() {
-    pushLine('ai', "Comandi: help, clear. Per chattare, scrivi e premi Invio. Il modello viene eseguito nel browser (puo' richiedere qualche minuto al primo avvio).");
+    pushLine('ai', "Comandi: help, clear, ingest, diag, ctx. Scrivi e premi Invio per chattare. Su GitHub Pages usa ?online=1 per caricare libreria e modello da CDN.");
+  }
+
+  async function diag() {
+    const okGpu = 'gpu' in navigator;
+    pushLine('ai', `WebGPU: ${okGpu ? 'OK' : 'assente'}`);
+    pushLine('ai', `Libreria WebLLM: ${window.webllm ? 'OK' : 'mancante'}`);
+    const candidates = [
+      'models/Llama-3.2-1B-Instruct-q4f16_1-MLC',
+      'models/Phi-3-mini-4k-instruct-q4f16_1-MLC',
+      'models/TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC'
+    ];
+    for (const p of candidates) {
+      try {
+        const r = await fetch(`${p}/mlc-chat-config.json`, { cache: 'no-store' });
+        pushLine('ai', `${p}: ${r.ok ? 'trovato' : 'non trovato'}`);
+      } catch {
+        pushLine('ai', `${p}: errore di accesso`);
+      }
+    }
+    // Check resolve/main and WASM for Llama e TinyLlama
+    const pLlama = 'models/Llama-3.2-1B-Instruct-q4f16_1-MLC/resolve/main';
+    try {
+      const rL = await fetch(`${pLlama}/mlc-chat-config.json`, { cache: 'no-store' });
+      pushLine('ai', `Struttura resolve/main (Llama 1B): ${rL.ok ? 'trovata' : 'NON trovata'} -> ${pLlama}`);
+    } catch { pushLine('ai', `Struttura resolve/main (Llama 1B): errore accesso -> ${pLlama}`); }
+    const wasmLlama = 'libs/webllm/wasm/Llama-3.2-1B-Instruct-q4f16_1-ctx4k_cs1k-webgpu.wasm';
+    try {
+      const r = await fetch(wasmLlama, { method: 'HEAD', cache: 'no-store' });
+      pushLine('ai', `WASM (Llama 1B): ${r.ok ? 'trovato' : 'non trovato'} -> ${wasmLlama}`);
+    } catch { pushLine('ai', `WASM (Llama 1B): errore accesso -> ${wasmLlama}`); }
+    const pTiny = 'models/TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC/resolve/main';
+    try {
+      const r2 = await fetch(`${pTiny}/mlc-chat-config.json`, { cache: 'no-store' });
+      pushLine('ai', `Struttura resolve/main (TinyLlama): ${r2.ok ? 'trovata' : 'NON trovata'} -> ${pTiny}`);
+    } catch { pushLine('ai', `Struttura resolve/main (TinyLlama): errore accesso -> ${pTiny}`); }
+    const wasmTiny = 'libs/webllm/wasm/TinyLlama-1.1B-Chat-v1.0-q4f16_1-ctx2k_cs1k-webgpu.wasm';
+    try {
+      const r = await fetch(wasmTiny, { method: 'HEAD', cache: 'no-store' });
+      pushLine('ai', `WASM (TinyLlama): ${r.ok ? 'trovato' : 'non trovato'} -> ${wasmTiny}`);
+    } catch { pushLine('ai', `WASM (TinyLlama): errore accesso -> ${wasmTiny}`); }
+    pushLine('ai', 'Se uno dei percorsi sopra è "trovato" e la libreria è OK, riprova a inviare un messaggio.');
   }
 
   let engine = null;
-  const history = [{ role: 'system', content: 'Sei un assistente utile. Rispondi in italiano in modo conciso.' }];
+  const history = [{ role: 'system', content: 'Parla in italiano. Rispondi in modo breve, chiaro e professionale. Regola: usa SOLO il Contesto fornito; se l\'informazione non è nel Contesto rispondi esattamente: "Non presente nel profilo".' }];
+  // Persona: rispondi come Michele in prima persona
+  history[0].content = 'Sei Michele Specchia. Rispondi sempre in prima persona ("io"). Parla in italiano in modo breve, chiaro e professionale. Usa SOLO il CONTESTO fornito (estratto dal mio profilo); se l\'informazione non è nel CONTESTO rispondi esattamente: "Non presente nel profilo". Evita preamboli e riferimenti al fatto di essere un modello.';
 
   async function loadWebLLMIfNeeded() {
     if (window.webllm) return true;
+    if (!window.isSecureContext) {
+      pushLine('ai', "Attenzione: WebGPU richiede un contesto sicuro (HTTPS o http://localhost). Avvia il sito con un server locale, ad es. 'python -m http.server'.");
+    }
     // niente WebGPU? passo a fallback testuale
     if (!('gpu' in navigator)) {
       pushLine('ai', 'Questo browser non espone WebGPU. Prova Chrome/Edge aggiornati (digita chrome://gpu) o attiva la flag WebGPU.');
       return false;
     }
-    const cdns = [
-      // Optional local copy (put file at libs/webllm/webllm.min.js)
-      './libs/webllm/webllm.min.js',
-      'https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.49/dist/webllm.min.js',
-      'https://unpkg.com/@mlc-ai/web-llm@0.2.49/dist/webllm.min.js'
+    // Prova prima come modulo ESM da node_modules o libs, poi come UMD locale
+    const moduleCandidates = [
+      './node_modules/@mlc-ai/web-llm/lib/index.js',
+      './libs/webllm/index.js',
+      './libs/webllm/lib/index.js'
     ];
-    for (const url of cdns) {
-      const status = pushLine('ai', 'Caricamento libreria WebLLM...');
+    for (const m of moduleCandidates) {
       try {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement('script');
-          s.src = url; s.async = true; s.onload = resolve; s.onerror = reject;
-          document.head.appendChild(s);
-        });
-        if (window.webllm) { status.textContent = 'Libreria caricata.'; return true; }
-      } catch { /* tenta prossimo CDN */ }
+        const mod = await import(m + `?v=${Date.now()}`);
+        if (mod) { window.webllm = mod; pushLine('ai', `Libreria caricata da ${m}`); return true; }
+      } catch { /* prova prossimo */ }
     }
-    pushLine('ai', 'Impossibile caricare WebLLM (forse offline). La chat funzionerà in modalità semplificata.');
+    // UMD locale, se presente
+    const umd = './libs/webllm/webllm.min.js';
+    try {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = umd; s.async = true; s.onload = resolve; s.onerror = reject;
+        document.head.appendChild(s);
+      });
+      if (window.webllm) { pushLine('ai', `Libreria caricata da ${umd}`); return true; }
+    } catch {}
+    // Se siamo su GitHub Pages o ?online=1, prova CDN
+    if (allowOnline) {
+      const cdns = [
+        'https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/dist/webllm.min.js',
+        'https://unpkg.com/@mlc-ai/web-llm/dist/webllm.min.js'
+      ];
+      for (const url of cdns) {
+        try {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = url; s.async = true; s.onload = resolve; s.onerror = reject;
+            document.head.appendChild(s);
+          });
+          if (window.webllm) { pushLine('ai', `Libreria caricata da CDN (${url})`); return true; }
+        } catch {}
+      }
+    }
+    pushLine('ai', "Libreria WebLLM non trovata. In locale: servi 'node_modules/@mlc-ai/web-llm/lib/index.js' o copia in 'libs/webllm/'. Online: aggiungi ?online=1 o pubblica su GitHub Pages.");
     return false;
   }
 
@@ -318,14 +387,104 @@ document.addEventListener('DOMContentLoaded', () => {
     if (engine) return engine;
     const ready = await loadWebLLMIfNeeded();
     if (!ready || !window.webllm) return null;
-    const { CreateWebWorkerMLCEngine } = window.webllm;
-    const model = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
+    const { CreateMLCEngine } = window.webllm;
+    // Solo locale: cerchiamo un modello in models/... e non usiamo CDN
+    const candidates = [
+      { id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC', nice: 'Llama 3.2 1B (local)', folder: 'Llama-3.2-1B-Instruct-q4f16_1-MLC' },
+      { id: 'Phi-3-mini-4k-instruct-q4f16_1-MLC', nice: 'Phi-3 mini 4k (local)', folder: 'Phi-3-mini-4k-instruct-q4f16_1-MLC' },
+      { id: 'TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC', nice: 'TinyLlama 1.1B (local)', folder: 'TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC' },
+    ];
+    let chosen = null;
+    let options = {};
+    function wasmFor(folder){
+      if (folder.startsWith('TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC')) return 'TinyLlama-1.1B-Chat-v1.0-q4f16_1-ctx2k_cs1k-webgpu.wasm';
+      if (folder.startsWith('Phi-3-mini-4k-instruct-q4f16_1-MLC')) return 'Phi-3-mini-4k-instruct-q4f16_1-ctx4k_cs1k-webgpu.wasm';
+      if (folder.startsWith('Llama-3.2-1B-Instruct-q4f16_1-MLC')) return 'Llama-3.2-1B-Instruct-q4f16_1-ctx4k_cs1k-webgpu.wasm';
+      return null;
+    }
+    for (const c of candidates) {
+      try {
+        const localPath = `models/${c.folder}`;
+        // prova prima la struttura resolve/main, poi la root
+        const tryBases = [ `${localPath}/resolve/main`, localPath ];
+        let foundBase;
+        for (const base of tryBases) {
+          const controller = new AbortController();
+          const t = setTimeout(() => controller.abort(), 1200);
+          const resp = await fetch(`${base}/mlc-chat-config.json`, { method: 'HEAD', signal: controller.signal, cache: 'no-store' });
+          clearTimeout(t);
+          if (resp.ok) { foundBase = base; break; }
+        }
+        if (foundBase) {
+          const modelId = 'local-' + c.id;
+          const wasmName = wasmFor(c.folder);
+          const wasmLocal = wasmName ? `libs/webllm/wasm/${wasmName}` : null;
+          const absModelBase = new URL(foundBase.replace(/\\/g, '/') + '/', window.location.origin).href;
+          const absWasm = wasmLocal ? new URL(wasmLocal.replace(/\\/g, '/'), window.location.origin).href : undefined;
+          options = {
+            appConfig: {
+              model_list: [
+                {
+                  model: absModelBase,
+                  model_id: modelId,
+                  model_name: `Local ${c.nice}`,
+                  model_lib: absWasm,
+                  low_resource_required: true,
+                },
+              ],
+            },
+          };
+          pushLine('ai', `Caricamento modello locale: ${c.folder}${foundBase.endsWith('/resolve/main') ? ' (resolve/main)' : ''}...`);
+          chosen = { modelId };
+          break;
+        }
+      } catch (_) { /* continue */ }
+    }
+    let modelToLoad = chosen?.modelId;
+    let initOptions = options;
+    if (!modelToLoad && allowOnline) {
+      modelToLoad = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
+      initOptions = {};
+      pushLine('ai', `Caricamento modello remoto: ${modelToLoad}...`);
+    }
+    if (!modelToLoad) {
+      pushLine('ai', "Modello locale non trovato. Aggiungi i file in 'models/.../resolve/main' oppure abilita la modalità online con ?online=1.");
+      return null;
+    }
     const status = pushLine('ai', 'Caricamento modello...');
-    engine = await CreateWebWorkerMLCEngine(model, {
+    engine = await CreateMLCEngine(modelToLoad, {
+      ...initOptions,
       initProgressCallback: (r) => { status.textContent = r.text || 'Inizializzazione...'; log.scrollTop = log.scrollHeight; },
     });
     pushLine('ai', 'Modello pronto.');
     return engine;
+  }
+
+  function sanitize(text) {
+    if (!text) return text;
+    let out = text;
+    // 1) taglia eventuali copie dell'istruzione di sistema (IT/EN)
+    const sysRe = /parla\s+in\s+italiano[\s\S]*?(?=\n\n|$)/i;
+    out = out.replace(sysRe, '').trimStart();
+    const sysEn = /in\s+italian,?\s+please\s+respond[\s\S]*?(?=\n\n|$)/i;
+    out = out.replace(sysEn, '').trimStart();
+    const genericSys = /you\s+are\s+a\s+helpful\s+assistant[\s\S]*/i;
+    out = out.replace(genericSys, '').trimStart();
+    // 2) rimuovi frasi boilerplate comuni
+    const lines = out.split(/\r?\n/);
+    const drop = [
+      /^(sure|certainly)[^a-zA-Z0-9]*.*$/i,
+      /^here('?|’)?s\s+a\s+(brief|short).*$/i,
+      /^i('?|’)d\s+be\s+happy\s+to\s+help.*$/i,
+      /^parla\s+in\s+italiano.*$/i,
+      /^in\s+italian.*$/i,
+      /^non\s+ripettere.*$/i,
+      /^se\s+non\s+sei\s+sicuro.*$/i
+    ];
+    const kept = lines.filter(l => !drop.some(re => re.test(l.trim())));
+    out = kept.join('\n').trim();
+    // 3) pulizia spazi multipli
+    return out.replace(/\n{3,}/g, '\n\n');
   }
 
   async function chat(userText) {
@@ -335,21 +494,44 @@ document.addEventListener('DOMContentLoaded', () => {
       pushLine('ai', 'Sono in modalità offline: non posso usare il modello nel browser. Riprova con connessione o WebGPU attivo.');
       return;
     }
-    history.push({ role: 'user', content: userText });
+    const messages = [...history];
+    if (window.__ragReady && typeof window.__ragSearch === 'function') {
+      const hits = window.__ragSearch(userText);
+      window.__lastCtx = hits;
+      // Costruisci il contesto: se troppo scarso, integra con un baseline del profilo
+      let ctxItems = (hits || []).map(h=>h.text);
+      if (ctxItems.length < 3 && typeof window.__ragBaseline === 'function') {
+        const base = window.__ragBaseline();
+        for (const b of base){ if(!ctxItems.includes(b)) ctxItems.push(b); }
+      }
+      if (ctxItems.length) {
+        const ctx = ctxItems.slice(0,6).map((t,i)=>`[${i+1}] ${t}`).join('\\n\\n');
+        const baseSys = messages[0] && messages[0].role === 'system' ? messages[0].content : '';
+        messages[0] = { role: 'system', content: `${baseSys}\\n\\nCONTESTO:\\n${ctx}\\n\\nISTRUZIONI: Rispondi solo usando il CONTESTO; se un dettaglio non è nel CONTESTO scrivi esattamente \'Non presente nel profilo\'. Formato: massimo 3 frasi o un elenco puntato molto breve.`.trim() };
+      }
+    }
+    messages.push({ role: 'user', content: userText });
     const out = pushLine('ai', '');
     try {
       const chunks = await eng.chat.completions.create({
-        messages: history,
+        messages,
         stream: true,
-        temperature: 0.7,
-        max_tokens: 256,
+        temperature: 0.1,
+        top_p: 0.85,
+        max_tokens: 200,
       });
       let full = '';
       for await (const part of chunks) {
         const delta = part?.choices?.[0]?.delta?.content || '';
-        if (delta) { full += delta; out.textContent = full; log.scrollTop = log.scrollHeight; }
+        if (delta) {
+          full += delta;
+          out.textContent = sanitize(full);
+          log.scrollTop = log.scrollHeight;
+        }
       }
-      history.push({ role: 'assistant', content: full });
+      const cleaned = sanitize(full);
+      history.push({ role: 'user', content: userText });
+      history.push({ role: 'assistant', content: cleaned });
     } catch (err) {
       out.textContent = 'Errore: ' + (err && err.message ? err.message : String(err));
     }
@@ -362,7 +544,45 @@ document.addEventListener('DOMContentLoaded', () => {
     pushLine('user', text);
     input.value = '';
     if (text === 'help') return help();
+    if (text === 'ingest') { window.__ragIngest && window.__ragIngest(); return; }
+    if (text === 'ctx') { const hits = window.__lastCtx||[]; if(!hits.length){ pushLine('ai','Nessun contesto disponibile. Esegui una domanda o "ingest".'); } else { pushLine('ai', hits.map((h,i)=>`[${i+1}] ${h.text}`).join('\n\n')); } return; }
+    if (text === 'diag') return diag();
     if (text === 'clear') { log.innerHTML = ''; return; }
     chat(text);
   });
+
+  // Mostra aiuto al primo avvio
+  help();
+  // RAG: indicizza automaticamente se presente un profilo locale
+  (function setupRAG(){
+    const STOP = new Set(['e','ed','di','a','da','in','con','su','per','tra','fra','il','lo','la','i','gli','le','un','una','uno','che','chi','come','dove','quando','quale','quali','quello','questa','questo','non','si','no','ma','o','al','ai','allo','all','alla','alle','agli','dei','della','dello','delle','degli','del','mi','ti','ci','vi','ne']);
+    const tok = s=> s.toLowerCase().normalize('NFKC').replace(/[^a-zàèéìòóù0-9]+/gi,' ').trim().split(/\s+/).filter(w=>w && !STOP.has(w));
+    const split = md => md.split(/\n{2,}/).map(s=>s.trim()).filter(x=>x.length>30).map((text,i)=>({id:`p${i}`, text}));
+    const rag = { ready:false };
+    const LS_MD = 'rag_profile_md_v1';
+    const LS_INDEX = 'rag_profile_idx_v1';
+    function saveToLocal(md){ try{ const data={ docs:rag.docs, ids:rag.ids, idf:[...rag.idf.entries()], vecs: rag.vecs.map(v=>[...v.entries()]), norms: rag.norm }; localStorage.setItem(LS_INDEX, JSON.stringify(data)); localStorage.setItem(LS_MD, md); }catch(_){} }
+    function loadFromLocal(){ try{ const json=localStorage.getItem(LS_INDEX); if(!json) return false; const data=JSON.parse(json); rag.docs=data.docs||[]; rag.ids=data.ids||[]; rag.idf=new Map(data.idf||[]); rag.vecs=(data.vecs||[]).map(e=>new Map(e)); rag.norm=data.norms||[]; rag.ready=true; window.__ragReady=true; return true; }catch(_){ return false; } }
+    function build(chunks){
+      const N=chunks.length; const df=new Map(); const tfs=[]; rag.docs=chunks.map(c=>c.text); rag.ids=chunks.map(c=>c.id);
+      for(const c of chunks){ const tf=new Map(); for(const t of tok(c.text)){ tf.set(t,(tf.get(t)||0)+1) } tfs.push(tf); for(const t of tf.keys()){ df.set(t,(df.get(t)||0)+1) } }
+      rag.idf=df; for(const [t,n] of df){ rag.idf.set(t, Math.log(1+N/(1+n))); }
+      rag.vecs=[]; rag.norm=[]; for(const tf of tfs){ let norm=0; const v=new Map(); for(const [t,c] of tf){ const w=(1+Math.log(c))*(rag.idf.get(t)||0); if(w>0){ v.set(t,w); norm+=w*w } } rag.vecs.push(v); rag.norm.push(Math.sqrt(norm)||1) }
+      rag.ready=true; window.__ragReady=true;
+    }
+    async function ingest(){ try{ const r=await fetch('data/profile.md',{cache:'no-store'}); if(!r.ok){ pushLine('ai','Nessun profilo in data/profile.md'); return;} const md=await r.text(); build(split(md)); saveToLocal(md); pushLine('ai', `Profilo indicizzato (${rag.docs.length} frammenti).`);}catch(e){ pushLine('ai','Errore ingest: '+(e?.message||e)); } }
+    function search(q){ if(!rag.ready) return []; const tf=new Map(); for(const t of tok(q)){ tf.set(t,(tf.get(t)||0)+1) } let norm=0; for(const [t,c] of tf){ const w=(1+Math.log(c))*(rag.idf.get(t)||0); tf.set(t,w); norm+=w*w } norm=Math.sqrt(norm)||1; const scores=[]; for(let i=0;i<rag.vecs.length;i++){ let dot=0; for(const [t,wq] of tf){ const wd=rag.vecs[i].get(t); if(wd) dot+=wd*wq } const s=dot/(rag.norm[i]*norm); if(s>0) scores.push([s,i]) } scores.sort((a,b)=>b[0]-a[0]); return scores.slice(0,6).map(([s,i])=>({score:s, id:rag.ids[i], text:rag.docs[i]})); }
+    function baseline(k=4){ if(!rag.ready) return []; const out=[]; for(let i=0;i<rag.docs.length && out.length<k;i++){ const t=rag.docs[i]; if(t && t.length>30) out.push(t); } return out; }
+    window.__ragIngest = ingest;
+    window.__ragSearch = search;
+    window.__ragBaseline = baseline;
+    // Ripristina dalla cache e controlla aggiornamenti del file
+    const restored = (typeof localStorage!=='undefined') ? loadFromLocal() : false;
+    if (restored) { pushLine('ai', `Profilo caricato dalla cache (${rag.docs.length} frammenti).`); }
+    fetch('data/profile.md',{cache:'no-store'}).then(async r=>{ if(!r.ok) return; const md=await r.text(); const prev=(typeof localStorage!=='undefined') ? (localStorage.getItem(LS_MD)||'') : ''; if(md && md!==prev){ build(split(md)); if(typeof localStorage!=='undefined') saveToLocal(md); pushLine('ai', `Profilo aggiornato (${rag.docs.length} frammenti).`); } });
+  })();
+  // Avvio automatico del modello all'apertura
+  (async()=>{ try{ await ensureEngine(); }catch(_){} })();
 });
+
+
