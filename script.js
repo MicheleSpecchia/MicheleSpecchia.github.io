@@ -511,6 +511,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function chat(userText) {
+    // Server mode: if a ?server= URL is provided, prefer it
+    const serverUrl = new URLSearchParams(location.search).get('server') || (window.SERVER_URL || '');
+    if (serverUrl) {
+      try {
+        await serverChat(userText, serverUrl);
+        return; // handled by server
+      } catch (e) {
+        pushLine('ai', 'Server non raggiungibile, passo al modello nel browser.');
+      }
+    }
     const eng = await ensureEngine();
     if (!eng) {
       // fallback locale: messaggio statico
@@ -593,6 +603,41 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       out.textContent = 'Errore: ' + (err && err.message ? err.message : String(err));
     }
+  }
+
+  async function serverChat(userText, baseUrl) {
+    const messages = [...history];
+    if (window.__ragReady && typeof window.__ragSearch === 'function') {
+      const hits = window.__ragSearch(userText);
+      window.__lastCtx = hits;
+      if (hits.length) {
+        const ctx = hits.map((h,i)=>`[${i+1}] ${h.text}`).join('\n\n');
+        const baseSys = messages[0] && messages[0].role === 'system' ? messages[0].content : '';
+        messages[0] = { role: 'system', content: `${baseSys}\n\nCONTESTO:\n${ctx}`.trim() };
+      }
+    }
+    messages.push({ role: 'user', content: userText });
+    const out = pushLine('ai', '');
+    const res = await fetch(`${baseUrl.replace(/\/$/, '')}/chat_stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, temperature: 0.2, top_p: 0.9, max_tokens: 256 })
+    });
+    if (!res.ok || !res.body) throw new Error('server-error');
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let full = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      const text = decoder.decode(value, { stream: true });
+      for (const line of text.split('\n')) {
+        if (!line.trim()) continue;
+        try { const obj = JSON.parse(line); if (obj.delta) { full += obj.delta; out.textContent = sanitize(full); } } catch {}
+      }
+    }
+    history.push({ role: 'user', content: userText });
+    history.push({ role: 'assistant', content: sanitize(full) });
   }
 
   input.addEventListener('keydown', (e) => {
