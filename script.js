@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function help() {
-    pushLine('ai', "Comandi: help, clear, ingest, diag, ctx. Parole chiave: bio, missione/valori, competenze | skills | linguaggi | stack | tecnologie, progetti | portfolio, esperienza, formazione, contatti | email | github | linkedin. Su GitHub Pages usa ?online=1 per usare i CDN.");
+    pushLine('ai', "Comandi: help, clear, ingest, diag, ctx. Bot RAG‑only: risponde solo dal profilo. Parole chiave: bio, missione/valori, competenze | skills | linguaggi | stack | tecnologie, progetti | portfolio, esperienza, formazione, contatti | email | github | linkedin.");
   }
 
   async function diag() {
@@ -447,8 +447,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Rileva repository GitHub Pages con file modello tracciati via LFS (pointer di ~100 byte)
     // e in tal caso forza il fallback al modello remoto
-    const urlParams = new URLSearchParams(location.search);
-    const preferTiny = urlParams.has('fast') || (urlParams.get('model')||'').toLowerCase()==='tiny';
     if (modelToLoad && initOptions && initOptions.appConfig && initOptions.appConfig.model_list && initOptions.appConfig.model_list[0] && initOptions.appConfig.model_list[0].model && onlineCapable) {
       try {
         const base = initOptions.appConfig.model_list[0].model; // URL assoluto della cartella resolve/main
@@ -460,16 +458,16 @@ document.addEventListener('DOMContentLoaded', () => {
           const looksLikeLFSPointer = (len > 0 && len < 10000) || ct.includes('text/plain');
           if (looksLikeLFSPointer) {
             pushLine('ai', 'Rilevati file modello serviti come pointer (Git LFS). Passo al modello remoto.');
-            modelToLoad = preferTiny ? 'TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC-1k' : 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
-            initOptions = { appConfig: { useIndexedDBCache: true } }; // usa prebuiltAppConfig + cache persistente
+            modelToLoad = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
+            initOptions = {}; // usa prebuiltAppConfig
           }
         }
       } catch (_) { /* ignora e continua */ }
     }
 
     if (!modelToLoad && onlineCapable) {
-      modelToLoad = preferTiny ? 'TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC-1k' : 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
-      initOptions = { appConfig: { useIndexedDBCache: true } };
+      modelToLoad = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
+      initOptions = {};
       pushLine('ai', `Caricamento modello remoto: ${modelToLoad}...`);
     }
     if (!modelToLoad) {
@@ -513,98 +511,49 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function chat(userText) {
-    // Server mode: if a ?server= URL is provided, prefer it
-    const serverUrl = new URLSearchParams(location.search).get('server') || (window.SERVER_URL || '');
-    if (serverUrl) {
-      try {
-        await serverChat(userText, serverUrl);
-        return; // handled by server
-      } catch (e) {
-        pushLine('ai', 'Server non raggiungibile, passo al modello nel browser.');
-      }
-    }
-    const eng = await ensureEngine();
-    if (!eng) {
-      // fallback locale: messaggio statico
-      pushLine('ai', 'Sono in modalità offline: non posso usare il modello nel browser. Riprova con connessione o WebGPU attivo.');
-      return;
-    }
-    const messages = [...history];
-    if (window.__ragReady && typeof window.__ragSearch === 'function') {
-      const hits = window.__ragSearch(userText);
-      window.__lastCtx = hits;
-      // Costruisci il contesto: 1) routing per keyword note, 2) RAG, 3) baseline
-      let ctxItems = [];
-      if (typeof window.__ragRoute === 'function') {
-        const routed = window.__ragRoute(userText) || [];
-        ctxItems.push(...routed);
-      }
-      ctxItems.push(...(hits || []).map(h=>h.text));
-      if (ctxItems.length < 3 && typeof window.__ragBaseline === 'function') {
-        const base = window.__ragBaseline();
-        for (const b of base){ if(!ctxItems.includes(b)) ctxItems.push(b); }
-      }
-      if (ctxItems.length) {
-        const ctx = ctxItems.slice(0,6).map((t,i)=>`[${i+1}] ${t}`).join('\\n\\n');
-        window.__lastCtxStr = ctx;
-        const baseSys = messages[0] && messages[0].role === 'system' ? messages[0].content : '';
-        messages[0] = { role: 'system', content: `${baseSys}\\n\\nCONTESTO:\\n${ctx}\\n\\nISTRUZIONI: Rispondi solo usando il CONTESTO. Se qualcosa non è nel CONTESTO, non improvvisare: rispondi in modo neutro (es. \'Non saprei rispondere con certezza su questo\') e proponi un tema del profilo pertinente. Formato: massimo 3 frasi o un elenco molto breve.`.trim() };
-      }
-    }
-    messages.push({ role: 'user', content: userText });
+    // RAG‑only: niente LLM e niente server
     const out = pushLine('ai', '');
-    try {
-      const chunks = await eng.chat.completions.create({
-        messages,
-        stream: true,
-        temperature: 0.1,
-        top_p: 0.85,
-        max_tokens: 200,
-      });
-      let full = '';
-      for await (const part of chunks) {
-        const delta = part?.choices?.[0]?.delta?.content || '';
-        if (delta) {
-          full += delta;
-          out.textContent = sanitize(full);
-          log.scrollTop = log.scrollHeight;
-        }
-      }
-      function finalize(text, question){
-        let t = sanitize(text).replace(/\bNon presente nel profilo\.?/gi,'');
-        const ctx = window.__lastCtxStr || '';
-        if (!/freelance/i.test(ctx)) {
-          t = t.replace(/[^.!?]*freelance[^.!?]*[.!?]/gi,'');
-        }
-        // Evita frasi da "modello di linguaggio" o similari e "non so" ripetute
-        t = t.replace(/[^.!?]*\b(modello di linguaggio|language model|modello|ai)\b[^.!?]*[.!?]/gi,'');
-        t = t.replace(/[^.!?]*\bnon\s+so\b[^.!?]*[.!?]/gi,'');
-        t = t.trim();
-        const q = (question||'').toLowerCase();
-        function firstSentences(s, n){ const a=(s||'').split(/(?<=[.!?])\s+/).filter(Boolean); return a.slice(0,n).join(' '); }
-        function fallbackIntro(){
-          const getSec = window.__ragGetSection ? window.__ragGetSection : ()=>'';
-          const bio = getSec('bio') || getSec('missione e valori') || '';
-          if (bio) return firstSentences(bio, 2);
-          // usa baseline generico
-          const base = (window.__ragBaseline ? window.__ragBaseline(2) : []) || [];
-          return base.length ? firstSentences(base[0], 2) : 'Posso raccontarti di bio, competenze, progetti o contatti.';
-        }
-        if (t.length < 40) {
-          // se la domanda riguarda origine/luogo e non c'è dato nel profilo
-          if (/\b(dove|provieni|origine|origini|nato|provenienza)\b/i.test(q)) {
-            return 'Preferisco non entrare nei dettagli sulla provenienza qui. ' + fallbackIntro();
-          }
-          return (t ? t + ' ' : '') + 'Non saprei rispondere con certezza su questo. ' + fallbackIntro();
-        }
-        return t;
-      }
-      const cleaned = finalize(full, userText);
-      history.push({ role: 'user', content: userText });
-      history.push({ role: 'assistant', content: cleaned });
-    } catch (err) {
-      out.textContent = 'Errore: ' + (err && err.message ? err.message : String(err));
+    const ans = profileAnswer(userText);
+    out.textContent = ans;
+    history.push({ role: 'user', content: userText });
+    history.push({ role: 'assistant', content: ans });
+  }
+
+  function profileAnswer(q){
+    const neutralFallbacks = [
+      'Non saprei rispondere con certezza su questo. Posso parlarti di bio, competenze, progetti o contatti.',
+      'Prova a essere più specifico. Posso raccontarti di bio, competenze, progetti o contatti.',
+      'Non ho abbastanza contesto. Vuoi sapere di bio, competenze, progetti o contatti?'
+    ];
+    const lower = (q||'').toLowerCase();
+    const routed = (typeof window.__ragRoute==='function') ? window.__ragRoute(q) : [];
+    const hits = (typeof window.__ragSearch==='function') ? window.__ragSearch(q) : [];
+    const ctxItems = [];
+    ctxItems.push(...routed);
+    if (hits && hits.length) ctxItems.push(...hits.map(h=>h.text));
+    if (ctxItems.length < 2 && typeof window.__ragBaseline==='function') {
+      const base = window.__ragBaseline(2);
+      for (const b of base){ if(!ctxItems.includes(b)) ctxItems.push(b); }
     }
+    function firstSentences(s, n){ const arr=(s||'').split(/(?<=[.!?])\s+/).filter(Boolean); return arr.slice(0,n).join(' '); }
+    // remove markdown headers from chunks
+    function stripHeaders(text){ return (text||'').replace(/(^|\n)#{1,6}\s*[^\n]*/g,'$1'); }
+    const chosen = ctxItems.slice(0,3).map(t=>firstSentences(stripHeaders(t),2));
+    let ans = chosen.filter(Boolean).join(' ');
+    ans = ans.replace(/\s+/g,' ').trim();
+    if (!ans || ans.length < 40) {
+      // Se non c'è alcuna keyword riconosciuta, restituisci fallback neutro
+      if (!(routed && routed.length)) {
+        return 'Non credo di aver capito, prova a riformulare';
+      }
+      if (/\b(dove|provieni|origine|origini|nato|provenienza)\b/i.test(lower)) {
+        const bio = (window.__ragGetSection && window.__ragGetSection('bio')) || '';
+        const bioLead = firstSentences(stripHeaders(bio),1);
+        return (bioLead ? bioLead + ' ' : '') + 'Preferisco non entrare nei dettagli sulla provenienza qui.';
+      }
+      return 'Non credo di aver capito, prova a riformulare';
+    }
+    return ans;
   }
 
   async function serverChat(userText, baseUrl) {
@@ -656,12 +605,28 @@ document.addEventListener('DOMContentLoaded', () => {
     chat(text);
   });
 
-  // Mostra aiuto al primo avvio
-  help();
+  // Avvio pulito: nessun messaggio iniziale
   // RAG: indicizza automaticamente se presente un profilo locale
   (function setupRAG(){
     const STOP = new Set(['e','ed','di','a','da','in','con','su','per','tra','fra','il','lo','la','i','gli','le','un','una','uno','che','chi','come','dove','quando','quale','quali','quello','questa','questo','non','si','no','ma','o','al','ai','allo','all','alla','alle','agli','dei','della','dello','delle','degli','del','mi','ti','ci','vi','ne']);
     const tok = s=> s.toLowerCase().normalize('NFKC').replace(/[^a-zàèéìòóù0-9]+/gi,' ').trim().split(/\s+/).filter(w=>w && !STOP.has(w));
+    function parseSections(md){
+      const lines = (md||'').split(/\r?\n/);
+      const sections = {}; let current = 'bio'; let buf = [];
+      function push(){
+        const raw = buf.join('\n');
+        const txt = raw.replace(/(^|\n)#{1,6}\s*[^\n]*/g,'$1').trim();
+        if (txt) sections[current] = txt;
+        buf = [];
+      }
+      for (const raw of lines) {
+        const m = raw.trim().match(/^##\s+(.+)/);
+        if (m) { push(); current = m[1].toLowerCase(); continue; }
+        buf.push(raw);
+      }
+      push();
+      return sections;
+    }
     const split = md => md.split(/\n{2,}/).map(s=>s.trim()).filter(x=>x.length>30).map((text,i)=>({id:`p${i}`, text}));
     const rag = { ready:false };
     const LS_MD = 'rag_profile_md_v1';
@@ -704,11 +669,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.__ragRoute = routeByKeyword;
     // Ripristina dalla cache e controlla aggiornamenti del file
     const restored = (typeof localStorage!=='undefined') ? loadFromLocal() : false;
-    if (restored) { pushLine('ai', `Profilo caricato dalla cache (${rag.docs.length} frammenti).`); }
+    if (restored) { /* keep terminal clean */ console.log(`RAG cache ripristinata: ${rag.docs.length} frammenti`); }
     fetch('data/profile.md',{cache:'no-store'}).then(async r=>{ if(!r.ok) return; const md=await r.text(); const prev=(typeof localStorage!=='undefined') ? (localStorage.getItem(LS_MD)||'') : ''; if(md && md!==prev){ rag.sections = (typeof parseSections==='function') ? parseSections(md) : (rag.sections||{}); build(split(md)); if(typeof localStorage!=='undefined') saveToLocal(md); pushLine('ai', `Profilo aggiornato (${rag.docs.length} frammenti).`); } else if(!restored) { rag.sections = (typeof parseSections==='function') ? parseSections(md) : (rag.sections||{}); } });
   })();
-  // Avvio automatico del modello all'apertura
-  (async()=>{ try{ await ensureEngine(); }catch(_){} })();
+  // Modalità RAG‑only: non caricare alcun modello all'avvio
 });
 
 
